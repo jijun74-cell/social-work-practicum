@@ -674,7 +674,7 @@
   <div class="toast-container" id="toastContainer"></div>
   
   <!-- 로그인 모달 -->
-  <div class="modal-overlay" id="loginModal" style="display: none;">
+  <div class="modal-overlay" id="loginModal">
     <div class="modal" style="max-width: 400px;">
       <div class="modal-header" style="background: linear-gradient(135deg, #2563eb, #1d4ed8); color: white;">
         <h3 class="modal-title"><i class="fas fa-sign-in-alt"></i> 로그인</h3>
@@ -1037,10 +1037,13 @@
     }
     
     function updateLoginButton() {
+      console.log('updateLoginButton called - loggedInEmail:', loggedInEmail);
       const isLoginPeriod = appStatus && appStatus.isLoginPeriod;
       const loginBtn = document.getElementById('loginBtn');
       const guestInfo = document.getElementById('guestInfo');
       const loggedInInfo = document.getElementById('loggedInInfo');
+      
+      console.log('updateLoginButton - isLoginPeriod:', isLoginPeriod, 'loginBtn:', loginBtn);
       
       if (loggedInEmail) {
         // 로그인 된 상태
@@ -1052,13 +1055,18 @@
         // 로그인 안 된 상태 - 항상 로그인 버튼 표시
         loggedInInfo.style.display = 'none';
         guestInfo.style.display = 'inline';
-        loginBtn.style.display = 'inline-block';
+        if (loginBtn) {
+          loginBtn.style.display = 'inline-block';
+          console.log('updateLoginButton - button set to inline-block');
+        }
         
         // 로그인 기간에 따라 버튼 텍스트 변경
-        if (isLoginPeriod) {
-          loginBtn.innerHTML = '<i class="fas fa-sign-in-alt"></i> 합격자 로그인';
-        } else {
-          loginBtn.innerHTML = '<i class="fas fa-sign-in-alt"></i> 로그인';
+        if (loginBtn) {
+          if (isLoginPeriod) {
+            loginBtn.innerHTML = '<i class="fas fa-sign-in-alt"></i> 합격자 로그인';
+          } else {
+            loginBtn.innerHTML = '<i class="fas fa-sign-in-alt"></i> 로그인';
+          }
         }
       }
     }
