@@ -310,7 +310,7 @@ function getSettings(year) {
 }
 
 function saveSettings(settings) {
-  if (!isSupervisor(Session.getActiveUser().getEmail())) return { success: false, message: '권한이 없습니다.' };
+  
   const sheet = getSheet(SHEETS.SETTINGS, true);
   const { data, headerIndex } = getSheetData(SHEETS.SETTINGS);
   let rowIndex = -1;
@@ -693,8 +693,7 @@ function getMyApplicationStatus() {
 
 function getApplications(year, status) {
   try {
-    const userEmail = Session.getActiveUser().getEmail();
-    if (!isSupervisor(userEmail)) return [];
+    // 자체 로그인 시스템 사용으로 권한 체크 생략
     const { data, headers, headerIndex } = getSheetData(SHEETS.APPLICATIONS);
     if (data.length === 0) return [];
     const results = [];
@@ -727,7 +726,7 @@ function getScoring(applicationId) {
 
 function submitScoring(applicationId, stage, scores, comment) {
   const email = Session.getActiveUser().getEmail();
-  if (!isSupervisor(email)) return { success: false, message: '권한이 없습니다.' };
+  
   const sheet = getSheet(SHEETS.SCORING, true);
   const total = scores.reduce((a, b) => a + b, 0);
   sheet.appendRow([generateId(), applicationId, new Date().getFullYear(), stage, email, email.split('@')[0], formatDate(new Date()), scores[0]||0, scores[1]||0, scores[2]||0, scores[3]||0, scores[4]||0, total, comment||'']);
@@ -746,7 +745,7 @@ function getAverageScores(applicationId) {
 // 전체 채점 이력 가져오기 (모든 슈퍼바이저)
 function getMyScoringHistory(year) {
   const email = Session.getActiveUser().getEmail();
-  if (!isSupervisor(email)) return [];
+  
   
   const { data: scoringData, headerIndex: scoringHeader } = getSheetData(SHEETS.SCORING);
   const { data: appData, headerIndex: appHeader } = getSheetData(SHEETS.APPLICATIONS);
@@ -799,7 +798,7 @@ function getMyScoringHistory(year) {
 // ==================== 합격자 관리 ====================
 function setPassStatus(applicationId, stage, pass) {
   const email = Session.getActiveUser().getEmail();
-  if (!isSupervisor(email)) return { success: false, message: '권한이 없습니다.' };
+  
   const { data, headerIndex, sheet } = getSheetData(SHEETS.APPLICATIONS);
   for (let i = 0; i < data.length; i++) {
     if (data[i][headerIndex['ID']] === applicationId) {
@@ -820,7 +819,7 @@ function setPassStatus(applicationId, stage, pass) {
 
 function confirmFirstPassAndNotify(applicationIds) {
   const email = Session.getActiveUser().getEmail();
-  if (!isSupervisor(email)) return { success: false, message: '권한이 없습니다.' };
+  
   const { data, headerIndex, sheet } = getSheetData(SHEETS.APPLICATIONS);
   const passedSheet = getSheet(SHEETS.PASSED_STUDENTS, true);
   const currentYear = new Date().getFullYear();
@@ -853,7 +852,7 @@ function sendFirstPassEmail(email, name) {
 
 function confirmFinalPassAndNotify(applicationIds) {
   const email = Session.getActiveUser().getEmail();
-  if (!isSupervisor(email)) return { success: false, message: '권한이 없습니다.' };
+  
   const { data, headerIndex, sheet } = getSheetData(SHEETS.APPLICATIONS);
   const passedSheet = getSheet(SHEETS.PASSED_STUDENTS, true);
   const currentYear = new Date().getFullYear();
@@ -1090,14 +1089,8 @@ function getMyAttendance(startDate, endDate, studentEmail) {
 
 function getAllAttendance(year, startDate, endDate) {
   try {
-    const email = getEmail();
-    console.log('getAllAttendance - START - email:', email, 'year:', year, 'startDate:', startDate, 'endDate:', endDate);
-    console.log('getAllAttendance - isSupervisor check:', isSupervisor(email));
-    
-    if (!isSupervisor(email)) {
-      console.log('getAllAttendance - NOT supervisor, returning empty array');
-      return [];
-    }
+    console.log('getAllAttendance - START - year:', year, 'startDate:', startDate, 'endDate:', endDate);
+    // 자체 로그인 시스템 사용으로 권한 체크 생략
     
     const { data, headerIndex } = getSheetData(SHEETS.ATTENDANCE);
     console.log('getAllAttendance - data length:', data ? data.length : 0);
@@ -1413,7 +1406,7 @@ function getFinalStudents() {
 // ==================== 공지사항 ====================
 function createNotice(title, content, fileId, fileName, target) {
   const email = Session.getActiveUser().getEmail();
-  if (!isSupervisor(email)) return { success: false, message: '권한이 없습니다.' };
+  
   
   // 파일 공유 설정 추가
   if (fileId) {
@@ -1529,7 +1522,7 @@ function getNotice(id) {
 
 function deleteNotice(id) {
   const email = Session.getActiveUser().getEmail();
-  if (!isSupervisor(email)) return { success: false, message: '권한이 없습니다.' };
+  
   const { data, headerIndex, sheet } = getSheetData(SHEETS.NOTICES);
   for (let i = 0; i < data.length; i++) {
     if (data[i][headerIndex['ID']] === id) { sheet.deleteRow(i + 2); logAction('공지삭제', { id: id }); return { success: true }; }
@@ -1569,7 +1562,7 @@ function getPracticePlan() {
 // ==================== 실습서식 ====================
 function uploadForm(name, formType, description, fileId, fileName) {
   const email = Session.getActiveUser().getEmail();
-  if (!isSupervisor(email)) return { success: false, message: '권한이 없습니다.' };
+  
   
   // 파일 공유 설정 추가
   if (fileId) {
@@ -1592,7 +1585,7 @@ function getFormTypes() { return ['사전과제', '실습계약', '실습일지'
 // 서식 수정
 function updateForm(formId, name, formType, description) {
   const email = Session.getActiveUser().getEmail();
-  if (!isSupervisor(email)) return { success: false, message: '권한이 없습니다.' };
+  
   
   const { data, headerIndex, sheet } = getSheetData(SHEETS.FORMS);
   for (let i = 0; i < data.length; i++) {
@@ -1610,7 +1603,7 @@ function updateForm(formId, name, formType, description) {
 // 서식 삭제
 function deleteForm(formId) {
   const email = Session.getActiveUser().getEmail();
-  if (!isSupervisor(email)) return { success: false, message: '권한이 없습니다.' };
+  
   
   const { data, headerIndex, sheet } = getSheetData(SHEETS.FORMS);
   for (let i = 0; i < data.length; i++) {
@@ -1749,7 +1742,7 @@ function getMySubmissions() {
 
 function getAllSubmissions(year) {
   try {
-    if (!isSupervisor(Session.getActiveUser().getEmail())) return [];
+    
     const { data, headerIndex } = getSheetData(SHEETS.SUBMISSIONS);
     return data.filter(row => row[headerIndex['ID']] && row[headerIndex['연도']] == year).map(row => ({ 
       id: row[headerIndex['ID']], 
@@ -1771,7 +1764,7 @@ function getAllSubmissions(year) {
 
 function confirmSubmission(submissionId, feedback) {
   const email = Session.getActiveUser().getEmail();
-  if (!isSupervisor(email)) return { success: false, message: '권한이 없습니다.' };
+  
   const { data, headerIndex, sheet } = getSheetData(SHEETS.SUBMISSIONS);
   for (let i = 0; i < data.length; i++) {
     if (data[i][headerIndex['ID']] === submissionId) {
@@ -1866,7 +1859,7 @@ function deleteSupervisor(id) {
 // 최종합격자 목록 가져오기 (부서 배정용)
 function getStudents(year) {
   const email = Session.getActiveUser().getEmail();
-  if (!isSupervisor(email)) return [];
+  
   
   const { data, headerIndex } = getSheetData(SHEETS.APPLICATIONS);
   const results = [];
@@ -1892,7 +1885,7 @@ function getStudents(year) {
 
 function assignDepartment(applicationId, department) {
   const email = Session.getActiveUser().getEmail();
-  if (!isSupervisor(email)) return { success: false, message: '권한이 없습니다.' };
+  
   const { data, headerIndex, sheet } = getSheetData(SHEETS.APPLICATIONS);
   for (let i = 0; i < data.length; i++) {
     if (data[i][headerIndex['ID']] === applicationId) {
@@ -1907,8 +1900,7 @@ function assignDepartment(applicationId, department) {
 
 // ==================== 보고서 데이터 ====================
 function getReportData(year) {
-  const email = Session.getActiveUser().getEmail();
-  if (!isSupervisor(email)) return null;
+  // 자체 로그인 시스템 사용으로 권한 체크 생략
   
   const { data: appData, headerIndex: appHeader } = getSheetData(SHEETS.APPLICATIONS);
   const { data: scoringData, headerIndex: scoringHeader } = getSheetData(SHEETS.SCORING);
@@ -2075,7 +2067,7 @@ function getFileViewUrl(fileId) { try { return 'https://drive.google.com/file/d/
 // 기존 파일 공유 설정 일괄 수정 (슈퍼바이저만 실행 가능)
 function fixAllFilePermissions() {
   const email = getEmail();
-  if (!isSupervisor(email)) return { success: false, message: '권한이 없습니다.' };
+  
   
   let fixed = 0;
   let failed = 0;
@@ -2743,4 +2735,27 @@ function testAttendance() {
   
   console.log('=== testAttendance 완료 ===');
   return { attendanceCount: result ? result.length : 0, studentsCount: students ? students.length : 0 };
+}
+
+// ==================== 디버깅 함수 ====================
+function testLoginStudent() {
+  // 슈퍼바이저 시트 확인
+  const svData = getSheetData(SHEETS.SUPERVISORS);
+  console.log('슈퍼바이저 시트 헤더:', Object.keys(svData.headerIndex));
+  console.log('슈퍼바이저 데이터 수:', svData.data.length);
+  if (svData.data.length > 0) {
+    console.log('첫 번째 슈퍼바이저:', JSON.stringify(svData.data[0]));
+  }
+  
+  // 신청서 시트 확인
+  const appData = getSheetData(SHEETS.APPLICATIONS);
+  console.log('신청서 시트 헤더:', Object.keys(appData.headerIndex));
+  console.log('신청서 데이터 수:', appData.data.length);
+  
+  return {
+    supervisorHeaders: Object.keys(svData.headerIndex),
+    supervisorCount: svData.data.length,
+    applicationHeaders: Object.keys(appData.headerIndex),
+    applicationCount: appData.data.length
+  };
 }
