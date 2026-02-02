@@ -3,7 +3,7 @@
 // ============================================================
 
 const ORG_CONFIG = {
-  // 기관 정보 (출석부, 이메일, 서식 등에 표시됨)
+  // 기관 정보 (출석부 PDF, 이메일, 서식 등에 표시됨)
   ORG_NAME: '○○종합사회복지관',           // 기관명
   ORG_PARENT: '사회복지법인 ○○재단',       // 상위 기관/법인명
   ORG_ADDRESS: '서울시 ○○구 ○○로 123',   // 주소
@@ -14,7 +14,6 @@ const ORG_CONFIG = {
   DEPARTMENTS: ['1팀', '2팀', '3팀', '4팀'],
   
   // 슈퍼바이저 이메일 도메인 (@ 뒷부분)
-  // 이 도메인의 이메일만 슈퍼바이저 앱에 접근 가능
   SUPERVISOR_DOMAIN: 'example.or.kr',
   
   // 관리자 이메일 (시스템 알림 수신)
@@ -37,16 +36,15 @@ const CONFIG = {
   SUPERVISOR_DOMAIN: ORG_CONFIG.SUPERVISOR_DOMAIN
 };
 
-// 테스트 계정 (개발/테스트 시에만 사용)
-// 운영 환경에서는 빈 배열로: const TEST_ACCOUNTS = [];
+// 부서 목록 (ORG_CONFIG에서 가져옴)
+const DEPARTMENTS = ORG_CONFIG.DEPARTMENTS;
+
+// 테스트 계정 (개발/테스트 시에만 사용, 운영 환경에서는 빈 배열로)
 const TEST_ACCOUNTS = [];
 
 // ============================================================
 // 아래부터는 수정하지 않아도 됩니다
 // ============================================================
-
-// 부서 목록 (ORG_CONFIG에서 가져옴)
-const DEPARTMENTS = ORG_CONFIG.DEPARTMENTS;
 
 const SHEETS = {
   SETTINGS: '설정',
@@ -66,8 +64,6 @@ const SHEETS = {
   SUPERVISORS: '슈퍼바이저'
 };
 
-const TEST_ACCOUNTS_OLD = null; // (테스트 계정은 위에서 정의됨)
-
 const HEADERS = {
   '설정': ['연도', '모집시작일', '모집종료일', '실습시작일', '실습종료일', '앱활성화', '합격자공개', '만족도활성화', '실습분야', '합격자로그인시작', '합격자로그인종료', '생성일'],
   '실습신청': ['ID', '연도', '신청일시', '이름', '생년월일', '성별', '연락처', '이메일', '주소', '학교', '학과', '학년', '학번', '실습지원분야', '실습동기', '자기소개', '자원봉사경험', '이전실습경험', '특기사항', '신청서파일ID', '상태', '1차합격', '2차합격', '배정부서'],
@@ -83,36 +79,25 @@ const HEADERS = {
   '로그': ['ID', '일시', '사용자', '액션', '상세', '비고'],
   '개인정보동의': ['ID', '이메일', '이름', '동의일시', '유형', '역할'],
   '슈퍼바이저동의': ['ID', '이메일', '동의일시', '비고'],
-  '슈퍼바이저': ['ID', '이름', '부서', '직위', '이메일', '활성화']
+  '슈퍼바이저': ['ID', '이름', '부서', '직위', '이메일', '비밀번호', '활성화']
 };
-
-// (TEST_ACCOUNTS는 위에서 정의됨)
 
 // ==================== 웹앱 진입점 ====================
 function doGet(e) {
-  const userEmail = getEmail();
   const app = e.parameter.app || 'student';
   
   if (app === 'supervisor') {
-    // 이메일을 가져올 수 없으면 일단 접근 허용 (앱 내부에서 체크)
-    // 이메일을 가져올 수 있으면 슈퍼바이저 여부 확인
-    if (userEmail && !isSupervisor(userEmail)) {
-      return HtmlService.createHtmlOutput(`<h1>접근 권한이 없습니다.</h1>
-        <p>슈퍼바이저 전용 앱은 @${ORG_CONFIG.SUPERVISOR_DOMAIN} 계정 또는 테스트 계정만 접근할 수 있습니다.</p>
-        <p>현재 로그인 계정: <strong>${userEmail}</strong></p>
-        <p>문의: ${ORG_CONFIG.ADMIN_EMAIL}</p>`)
-        .setTitle('접근 거부');
-    }
+    // 슈퍼바이저 앱: 앱 내부에서 자체 로그인으로 처리
     return HtmlService.createTemplateFromFile('SupervisorApp')
       .evaluate()
-      .setTitle(ORG_CONFIG.ORG_NAME + ' 현장실습 - 슈퍼바이저')
+      .setTitle('사회복지현장실습 관리 - 슈퍼바이저')
       .addMetaTag('viewport', 'width=device-width, initial-scale=1')
       .setXFrameOptionsMode(HtmlService.XFrameOptionsMode.ALLOWALL);
   }
   
   return HtmlService.createTemplateFromFile('StudentApp')
     .evaluate()
-    .setTitle(ORG_CONFIG.ORG_NAME + ' 현장실습 - 실습생')
+    .setTitle('사회복지현장실습 관리 - 실습생')
     .addMetaTag('viewport', 'width=device-width, initial-scale=1')
     .setXFrameOptionsMode(HtmlService.XFrameOptionsMode.ALLOWALL);
 }
@@ -122,18 +107,13 @@ function include(filename) {
 }
 
 // ==================== 유틸리티 함수 ====================
-// 안전하게 이메일 가져오기
+// 안전하게 이메일 가져오기 (실제 로그인 사용자만)
 function getEmail() {
   try {
-    // 방법 1: getActiveUser
-    let email = Session.getActiveUser().getEmail();
-    if (email) return email;
-    
-    // 방법 2: getEffectiveUser
-    email = Session.getEffectiveUser().getEmail();
-    if (email) return email;
-    
-    return '';
+    // getActiveUser만 사용 (실제 로그인한 사용자)
+    // getEffectiveUser는 배포자 이메일을 반환할 수 있어 사용하지 않음
+    const email = Session.getActiveUser().getEmail();
+    return email || '';
   } catch (e) {
     console.error('getEmail error:', e);
     return '';
@@ -389,6 +369,34 @@ function loginStudent(email, password) {
       return { success: false, message: '이메일과 비밀번호를 입력해주세요.' };
     }
     
+    // 1. 먼저 슈퍼바이저인지 확인
+    const svData = getSheetData(SHEETS.SUPERVISORS);
+    for (let i = 0; i < svData.data.length; i++) {
+      if (svData.data[i][svData.headerIndex['이메일']] === email) {
+        const isActive = svData.data[i][svData.headerIndex['활성화']] === true || 
+                         svData.data[i][svData.headerIndex['활성화']] === 'TRUE';
+        if (!isActive) {
+          return { success: false, message: '비활성화된 계정입니다.' };
+        }
+        const storedPassword = String(svData.data[i][svData.headerIndex['비밀번호']] || '');
+        if (storedPassword === password) {
+          const name = svData.data[i][svData.headerIndex['이름']];
+          console.log('loginStudent (supervisor) success:', email, name);
+          return { 
+            success: true, 
+            email: email,
+            name: name,
+            status: '최종합격',  // 슈퍼바이저는 최종합격자와 동일한 권한
+            isSupervisor: true,
+            message: '슈퍼바이저 로그인 성공'
+          };
+        } else {
+          return { success: false, message: '비밀번호가 일치하지 않습니다.' };
+        }
+      }
+    }
+    
+    // 2. 슈퍼바이저가 아니면 최종합격자 확인
     const { data, headerIndex } = getSheetData(SHEETS.APPLICATIONS);
     const currentYear = new Date().getFullYear();
     
@@ -408,6 +416,7 @@ function loginStudent(email, password) {
             email: email,
             name: name,
             status: status,
+            isSupervisor: false,
             message: '로그인 성공'
           };
         } else {
@@ -416,10 +425,76 @@ function loginStudent(email, password) {
       }
     }
     
-    return { success: false, message: '등록된 신청 정보가 없습니다.\n실습 신청을 먼저 완료해주세요.' };
+    return { success: false, message: '등록된 정보가 없습니다.\n최종합격자 또는 슈퍼바이저만 로그인할 수 있습니다.' };
   } catch (error) {
     console.error('loginStudent error:', error);
     return { success: false, message: '로그인 중 오류가 발생했습니다.' };
+  }
+}
+
+// ==================== 슈퍼바이저 로그인 ====================
+function loginSupervisor(email, password) {
+  try {
+    if (!email || !password) {
+      return { success: false, message: '이메일과 비밀번호를 입력해주세요.' };
+    }
+    
+    const { data, headerIndex } = getSheetData(SHEETS.SUPERVISORS);
+    
+    // 이메일로 슈퍼바이저 찾기
+    for (let i = 0; i < data.length; i++) {
+      if (data[i][headerIndex['이메일']] === email) {
+        // 활성화 여부 확인
+        const isActive = data[i][headerIndex['활성화']] === true || data[i][headerIndex['활성화']] === 'TRUE';
+        if (!isActive) {
+          return { success: false, message: '비활성화된 계정입니다.\n관리자에게 문의하세요.' };
+        }
+        
+        // 비밀번호 확인
+        const storedPassword = String(data[i][headerIndex['비밀번호']] || '');
+        if (storedPassword === password) {
+          const name = data[i][headerIndex['이름']];
+          const department = data[i][headerIndex['부서']] || '';
+          const position = data[i][headerIndex['직위']] || '';
+          
+          console.log('loginSupervisor success:', email, name);
+          return { 
+            success: true, 
+            email: email,
+            name: name,
+            department: department,
+            position: position,
+            message: '로그인 성공'
+          };
+        } else {
+          return { success: false, message: '비밀번호가 일치하지 않습니다.' };
+        }
+      }
+    }
+    
+    return { success: false, message: '등록된 슈퍼바이저가 아닙니다.\n관리자에게 문의하세요.' };
+  } catch (error) {
+    console.error('loginSupervisor error:', error);
+    return { success: false, message: '로그인 중 오류가 발생했습니다.' };
+  }
+}
+
+// 슈퍼바이저 권한 확인 (로그인된 이메일로)
+function checkSupervisorAuth(supervisorEmail) {
+  if (!supervisorEmail) return false;
+  
+  try {
+    const { data, headerIndex } = getSheetData(SHEETS.SUPERVISORS);
+    for (let i = 0; i < data.length; i++) {
+      if (data[i][headerIndex['이메일']] === supervisorEmail) {
+        const isActive = data[i][headerIndex['활성화']] === true || data[i][headerIndex['활성화']] === 'TRUE';
+        return isActive;
+      }
+    }
+    return false;
+  } catch (error) {
+    console.error('checkSupervisorAuth error:', error);
+    return false;
   }
 }
 
@@ -492,38 +567,28 @@ function getMyApplicationStatusByEmail(studentEmail) {
 
 function getAppStatus() {
   try {
-    const user = getCurrentUser();
     const settings = getSettings();
-    const email = user.email || '';
     
-    // 사용자의 신청 상태 확인
-    let userApplicationStatus = null;
-    if (email) {
-      const appStatus = getMyApplicationStatus();
-      if (appStatus) {
-        userApplicationStatus = appStatus.status;
-      }
-    }
-    
+    // 실습생 앱: 자체 로그인 시스템 사용
+    // isTestMode는 항상 false (로그인된 이메일로 별도 체크)
     return { 
-      user: user, 
+      user: { email: '' }, 
       settings: settings, 
       isRecruitmentPeriod: isRecruitmentPeriod(), 
       isPracticePeriod: isPracticePeriod(), 
       isLoginPeriod: isLoginPeriod(),
-      isTestMode: isTestAccount(email),
-      userApplicationStatus: userApplicationStatus
+      isTestMode: false,  // 실습생 앱에서는 자체 로그인으로 처리
+      userApplicationStatus: null
     };
   } catch (error) {
     console.error('getAppStatus error:', error);
-    const email = getEmail();
     return { 
-      user: { email: email, isSupervisor: isSupervisor(email), isTestAccount: isTestAccount(email) }, 
+      user: { email: '' }, 
       settings: { year: new Date().getFullYear(), appActive: false, resultsPublic: false, satisfactionActive: false, practiceFields: '', loginStart: '', loginEnd: '' }, 
       isRecruitmentPeriod: false, 
       isPracticePeriod: false, 
       isLoginPeriod: false,
-      isTestMode: isTestAccount(email),
+      isTestMode: false,
       userApplicationStatus: null
     };
   }
@@ -610,7 +675,7 @@ function createApplicationPDF(id, formData) {
 
 function sendApplicationConfirmEmail(email, name) {
   try {
-    MailApp.sendEmail(email, '[신림종합사회복지관] 사회복지현장실습 신청 접수 완료', '안녕하세요, '+name+'님.\n\n사회복지현장실습 신청이 정상적으로 접수되었습니다.\n\n심사 결과는 별도 안내 예정입니다.\n문의사항이 있으시면 복지관으로 연락해 주세요.\n\n감사합니다.\n\n신림종합사회복지관 드림');
+    MailApp.sendEmail(email, '['+ORG_CONFIG.ORG_NAME+'] 사회복지현장실습 신청 접수 완료', '안녕하세요, '+name+'님.\n\n사회복지현장실습 신청이 정상적으로 접수되었습니다.\n\n심사 결과는 별도 안내 예정입니다.\n문의사항이 있으시면 복지관으로 연락해 주세요.\n\n감사합니다.\n\n'+ORG_CONFIG.ORG_NAME+' 드림');
   } catch (e) { console.error('이메일 발송 실패:', e); }
 }
 
@@ -783,7 +848,7 @@ function confirmFirstPassAndNotify(applicationIds) {
 }
 
 function sendFirstPassEmail(email, name) {
-  try { MailApp.sendEmail(email, '[신림종합사회복지관] 사회복지현장실습 1차 합격 안내', '안녕하세요, '+name+'님.\n\n사회복지현장실습 1차 서류심사에 합격하셨습니다.\n\n2차 면접 일정은 별도로 안내될 예정입니다.\n합격 여부는 웹앱에서도 확인하실 수 있습니다.\n\n감사합니다.\n\n신림종합사회복지관 드림'); } catch (e) { console.error('이메일 발송 실패:', e); }
+  try { MailApp.sendEmail(email, '['+ORG_CONFIG.ORG_NAME+'] 사회복지현장실습 1차 합격 안내', '안녕하세요, '+name+'님.\n\n사회복지현장실습 1차 서류심사에 합격하셨습니다.\n\n2차 면접 일정은 별도로 안내될 예정입니다.\n합격 여부는 웹앱에서도 확인하실 수 있습니다.\n\n감사합니다.\n\n'+ORG_CONFIG.ORG_NAME+' 드림'); } catch (e) { console.error('이메일 발송 실패:', e); }
 }
 
 function confirmFinalPassAndNotify(applicationIds) {
@@ -813,7 +878,7 @@ function confirmFinalPassAndNotify(applicationIds) {
 }
 
 function sendFinalPassEmail(email, name) {
-  try { MailApp.sendEmail(email, '[신림종합사회복지관] 사회복지현장실습 최종 합격 안내', '안녕하세요, '+name+'님.\n\n사회복지현장실습 최종 합격을 축하드립니다!\n\n실습 전 필요한 정보 입력을 위해 웹앱에 접속하여\n\'최종합격자 정보입력\' 메뉴에서 필수 정보를 입력해 주세요.\n\n감사합니다.\n\n신림종합사회복지관 드림'); } catch (e) { console.error('이메일 발송 실패:', e); }
+  try { MailApp.sendEmail(email, '['+ORG_CONFIG.ORG_NAME+'] 사회복지현장실습 최종 합격 안내', '안녕하세요, '+name+'님.\n\n사회복지현장실습 최종 합격을 축하드립니다!\n\n실습 전 필요한 정보 입력을 위해 웹앱에 접속하여\n\'최종합격자 정보입력\' 메뉴에서 필수 정보를 입력해 주세요.\n\n감사합니다.\n\n'+ORG_CONFIG.ORG_NAME+' 드림'); } catch (e) { console.error('이메일 발송 실패:', e); }
 }
 
 // 합격자 목록 가져오기 (공개용 - 이름 마스킹)
@@ -1181,10 +1246,10 @@ function generateAttendanceReport(email, name, startDate, endDate) {
 <body>
   <div class="header">
     <div style="display: flex; align-items: center; justify-content: center; gap: 15px;">
-      <div style="font-size: 11pt; color: #666;">${ORG_CONFIG.ORG_PARENT}</div>
-      <div class="org-name">${ORG_CONFIG.ORG_NAME}</div>
+      <div style="font-size: 11pt; color: #666;">'+ORG_CONFIG.ORG_PARENT+'</div>
+      <div class="org-name">'+ORG_CONFIG.ORG_NAME+'</div>
     </div>
-    <div class="org-info">${ORG_CONFIG.ORG_ADDRESS} | Tel: ${ORG_CONFIG.ORG_TEL}</div>
+    <div class="org-info">'+ORG_CONFIG.ORG_ADDRESS+' | Tel: '+ORG_CONFIG.ORG_TEL+'</div>
   </div>
   
   <h1>사회복지현장실습 출석부</h1>
@@ -1262,7 +1327,7 @@ function generateAttendanceReport(email, name, startDate, endDate) {
   
   <div class="footer">
     <p>출력일: ${formatDateOnly(new Date())}</p>
-    <p>본 문서는 ${ORG_CONFIG.ORG_NAME} 사회복지현장실습 관리시스템에서 자동 생성되었습니다.</p>
+    <p>본 문서는 '+ORG_CONFIG.ORG_NAME+' 사회복지현장실습 관리시스템에서 자동 생성되었습니다.</p>
   </div>
 </body>
 </html>`;
@@ -1650,7 +1715,7 @@ function sendAssignmentNotification(supervisorEmail, studentName, assignmentType
       '■ 제출일시: ' + formatDate(new Date()) + '\n\n' +
       '슈퍼바이저 웹앱에서 확인해 주세요.\n\n' +
       '감사합니다.\n' +
-      '신림종합사회복지관 사회복지현장실습';
+      ''+ORG_CONFIG.ORG_NAME+' 사회복지현장실습';
     MailApp.sendEmail(supervisorEmail, subject, body);
   } catch (e) { 
     console.error('과제 알림 메일 발송 실패:', e); 
@@ -1658,7 +1723,7 @@ function sendAssignmentNotification(supervisorEmail, studentName, assignmentType
 }
 
 function sendFeedbackNotification(studentEmail, studentName, title, feedback) {
-  try { MailApp.sendEmail(studentEmail, '[실습과제] 과제 피드백이 등록되었습니다', '안녕하세요, '+studentName+'님.\n\n제출하신 과제에 대한 피드백이 등록되었습니다.\n\n■ 과제 제목: '+title+'\n\n■ 피드백 내용:\n'+feedback+'\n\n슈퍼바이저의 피드백을 확인하시고, 추가 질문이 있으시면 담당 슈퍼바이저에게 문의해 주세요.\n\n감사합니다.\n신림종합사회복지관 사회복지현장실습'); } catch (e) { console.error('피드백 알림 메일 발송 실패:', e); }
+  try { MailApp.sendEmail(studentEmail, '[실습과제] 과제 피드백이 등록되었습니다', '안녕하세요, '+studentName+'님.\n\n제출하신 과제에 대한 피드백이 등록되었습니다.\n\n■ 과제 제목: '+title+'\n\n■ 피드백 내용:\n'+feedback+'\n\n슈퍼바이저의 피드백을 확인하시고, 추가 질문이 있으시면 담당 슈퍼바이저에게 문의해 주세요.\n\n감사합니다.\n'+ORG_CONFIG.ORG_NAME+' 사회복지현장실습'); } catch (e) { console.error('피드백 알림 메일 발송 실패:', e); }
 }
 
 function getMySubmissions() {
@@ -1738,7 +1803,7 @@ function submitSatisfaction(responses) {
 function getSatisfactionResults(year) {
   try {
     const email = Session.getActiveUser().getEmail();
-    const ADMIN_EMAIL = ORG_CONFIG.ADMIN_EMAIL;
+    const ADMIN_EMAIL = 'jji@sillym.or.kr';
     if (email !== ADMIN_EMAIL && !isTestAccount(email)) return { restricted: true, message: '만족도 조사 결과는 관리자만 조회할 수 있습니다.' };
     const { data, headerIndex } = getSheetData(SHEETS.SATISFACTION);
     return data.filter(row => row[headerIndex['ID']] && row[headerIndex['연도']] == year).map(row => ({ id: row[headerIndex['ID']], submittedAt: row[headerIndex['제출일시']] instanceof Date ? formatDate(row[headerIndex['제출일시']]) : row[headerIndex['제출일시']], responses: { q1: row[headerIndex['q1']], q2: row[headerIndex['q2']], q3: row[headerIndex['q3']], q4: row[headerIndex['q4']], q5: row[headerIndex['q5']], q6: row[headerIndex['q6']], q7: row[headerIndex['q7']], q8: row[headerIndex['q8']], q9: row[headerIndex['q9']], q10: row[headerIndex['q10']], positive: row[headerIndex['positive']], improvement: row[headerIndex['improvement']], other: row[headerIndex['other']] } }));
@@ -1749,7 +1814,15 @@ function getSatisfactionResults(year) {
 function getSupervisors() {
   try {
     const { data, headerIndex } = getSheetData(SHEETS.SUPERVISORS);
-    return data.filter(row => row[headerIndex['ID']]).map(row => ({ id: row[headerIndex['ID']], name: row[headerIndex['이름']], department: row[headerIndex['부서']], position: row[headerIndex['직위']], email: row[headerIndex['이메일']], active: row[headerIndex['활성화']] === true || row[headerIndex['활성화']] === 'TRUE' }));
+    return data.filter(row => row[headerIndex['ID']]).map(row => ({ 
+      id: row[headerIndex['ID']], 
+      name: row[headerIndex['이름']], 
+      department: row[headerIndex['부서']], 
+      position: row[headerIndex['직위']], 
+      email: row[headerIndex['이메일']], 
+      password: row[headerIndex['비밀번호']] || '',
+      active: row[headerIndex['활성화']] === true || row[headerIndex['활성화']] === 'TRUE' 
+    }));
   } catch (error) { return []; }
 }
 
@@ -1758,23 +1831,21 @@ function getSupervisorsByDepartment(department) {
   return supervisors.filter(s => s.department === department && s.active);
 }
 
-function addSupervisor(name, department, position, email) {
-  const userEmail = Session.getActiveUser().getEmail();
-  if (!isSupervisor(userEmail)) return { success: false, message: '권한이 없습니다.' };
+function addSupervisor(name, department, position, email, password) {
+  // 권한 체크 생략 (자체 로그인 시스템 사용)
   const sheet = getSheet(SHEETS.SUPERVISORS, true);
-  sheet.appendRow([generateId(), name, department, position, email, true]);
+  sheet.appendRow([generateId(), name, department, position, email, password, true]);
   logAction('슈퍼바이저추가', { name: name, email: email });
   return { success: true };
 }
 
-function updateSupervisor(id, name, department, position, email, active) {
-  const userEmail = Session.getActiveUser().getEmail();
-  if (!isSupervisor(userEmail)) return { success: false, message: '권한이 없습니다.' };
+function updateSupervisor(id, name, department, position, email, password, active) {
+  // 권한 체크 생략 (자체 로그인 시스템 사용)
   const { data, headerIndex, sheet } = getSheetData(SHEETS.SUPERVISORS);
   for (let i = 0; i < data.length; i++) {
     if (data[i][headerIndex['ID']] === id) {
       const rowNum = i + 2;
-      sheet.getRange(rowNum, 1, 1, 6).setValues([[id, name, department, position, email, active]]);
+      sheet.getRange(rowNum, 1, 1, 7).setValues([[id, name, department, position, email, password, active]]);
       logAction('슈퍼바이저수정', { id: id, name: name });
       return { success: true };
     }
@@ -1783,8 +1854,7 @@ function updateSupervisor(id, name, department, position, email, active) {
 }
 
 function deleteSupervisor(id) {
-  const userEmail = Session.getActiveUser().getEmail();
-  if (!isSupervisor(userEmail)) return { success: false, message: '권한이 없습니다.' };
+  // 권한 체크 생략 (자체 로그인 시스템 사용)
   const { data, headerIndex, sheet } = getSheetData(SHEETS.SUPERVISORS);
   for (let i = 0; i < data.length; i++) {
     if (data[i][headerIndex['ID']] === id) { sheet.deleteRow(i + 2); logAction('슈퍼바이저삭제', { id: id }); return { success: true }; }
@@ -2126,7 +2196,7 @@ function getFormTemplate(templateType) {
 <div style="border: 1px solid #ccc; padding: 15px; margin-bottom: 20px; font-size: 0.9em; line-height: 1.8;"><ul style="margin: 0; padding-left: 20px;"><li>실습기관은 실습지도자가 실습을 지도하기에 충분한 여건을 조성한다.</li><li>실습공간의 확보 및 시설을 제공한다.</li><li>실습생 교육에 책임을 인식하고 있어야 한다.</li><li>실습교육계획을 수립하여야 한다.<ul style="margin-top: 5px;"><li>실습교육 이전에 실습지도 목적과 지도방침을 설정해 놓아야 한다.</li></ul></li><li>실습생의 욕구를 이해하고 이와 관련하여 적합한 교육을 할 수 있도록 준비한다.</li><li>실습교육 이전에 기관의 직원들에게 실습계획을 알리고 실습생을 소개시킨다.</li><li>실습생이 이론적인 개념을 현장에 연관하고 통합할 수 있도록 학습의 기회를 제공한다.</li><li>실습교육 목표에 부합하는 실습지도를 수행할 수 있도록 학교와 협조체계를 유지한다.</li><li>실습평가를 실시하여 실습교육에 대해 실습생과 토의한다.</li></ul></div>
 <h3 style="background: #f0f7ff; padding: 8px; margin: 15px 0 10px;">5. 학교, 실습지도교수의 의무와 책임</h3>
 <div style="border: 1px solid #ccc; padding: 15px; margin-bottom: 20px; font-size: 0.9em; line-height: 1.8;"><ul style="margin: 0; padding-left: 20px;"><li>학교에서는 실습교육의 목적과 목표가 성취될 수 있도록 실습교육 전반에 대한 책임을 맡는다.</li><li>실습지도교수는 실습종료 후 실습교육 향상을 위해 실습기관에 대한 평가, 실습교육의 효과성을 평가하여 실습기관에 피드백을 제공한다.</li><li>실습지도교수는 실습생의 실습수행평가를 위하여 실습기간중 1회이상 실습기관을 방문한다.</li></ul></div>
-<div style="border: 2px solid #333; padding: 20px; margin-top: 30px; background: #fafafa;"><p style="text-align: center; font-weight: bold; margin-bottom: 20px;">상기 사항을 성실하게 이행하여 실습을 진행하도록 하겠습니다.</p><p style="text-align: right; margin-bottom: 30px;">________년 ________월 ________일</p><table style="width: 100%; border-collapse: collapse;"><tr><td style="padding: 10px; width: 15%; font-weight: bold;">실습생</td><td style="padding: 10px;">________________대학교 ________________학과</td><td style="padding: 10px; width: 20%; text-align: right;">________________ (인)</td></tr><tr><td style="padding: 10px; font-weight: bold;">실습지도교수</td><td style="padding: 10px;">________________대학교 ________________학과</td><td style="padding: 10px; text-align: right;">________________ (인)</td></tr><tr><td style="padding: 10px; font-weight: bold;">실습지도기관</td><td style="padding: 10px;">신림종합사회복지관</td><td style="padding: 10px; text-align: right;">관장 최 성 숙 (인)</td></tr><tr><td style="padding: 10px; font-weight: bold;">실습지도자</td><td style="padding: 10px;"></td><td style="padding: 10px; text-align: right;">________________ (인)</td></tr></table></div>
+<div style="border: 2px solid #333; padding: 20px; margin-top: 30px; background: #fafafa;"><p style="text-align: center; font-weight: bold; margin-bottom: 20px;">상기 사항을 성실하게 이행하여 실습을 진행하도록 하겠습니다.</p><p style="text-align: right; margin-bottom: 30px;">________년 ________월 ________일</p><table style="width: 100%; border-collapse: collapse;"><tr><td style="padding: 10px; width: 15%; font-weight: bold;">실습생</td><td style="padding: 10px;">________________대학교 ________________학과</td><td style="padding: 10px; width: 20%; text-align: right;">________________ (인)</td></tr><tr><td style="padding: 10px; font-weight: bold;">실습지도교수</td><td style="padding: 10px;">________________대학교 ________________학과</td><td style="padding: 10px; text-align: right;">________________ (인)</td></tr><tr><td style="padding: 10px; font-weight: bold;">실습지도기관</td><td style="padding: 10px;">'+ORG_CONFIG.ORG_NAME+'</td><td style="padding: 10px; text-align: right;">관장 '+ORG_CONFIG.ORG_DIRECTOR+' (인)</td></tr><tr><td style="padding: 10px; font-weight: bold;">실습지도자</td><td style="padding: 10px;"></td><td style="padding: 10px; text-align: right;">________________ (인)</td></tr></table></div>
 `,
 
     // 별지3: 실습생 Profile
@@ -2215,7 +2285,7 @@ function getFormTemplate(templateType) {
     // 별지14: 실습중간평가서
     'mid_evaluation': `
 <h2 style="text-align: center; margin-bottom: 20px; font-size: 1.5em;">실습 중간 평가서</h2>
-<table border="1" style="width: 100%; border-collapse: collapse; margin-bottom: 20px;"><tr><td style="width: 15%; background: #f5f5f5; padding: 10px; font-weight: bold;">실습생 성명</td><td style="width: 18%; padding: 10px;"></td><td style="width: 10%; background: #f5f5f5; padding: 10px; font-weight: bold;">소속</td><td style="padding: 10px;">________대학교 ________학과 ____학년</td></tr><tr><td style="background: #f5f5f5; padding: 10px; font-weight: bold;">실습기관</td><td style="padding: 10px;">신림종합사회복지관</td><td style="background: #f5f5f5; padding: 10px; font-weight: bold;">실습분야</td><td style="padding: 10px;"></td></tr><tr><td style="background: #f5f5f5; padding: 10px; font-weight: bold;">실습기간</td><td style="padding: 10px;"></td><td style="background: #f5f5f5; padding: 10px; font-weight: bold;">실습지도자</td><td style="padding: 10px;"></td></tr><tr><td style="background: #f5f5f5; padding: 10px; font-weight: bold;">실습내용</td><td colspan="3" style="padding: 10px;"></td></tr></table>
+<table border="1" style="width: 100%; border-collapse: collapse; margin-bottom: 20px;"><tr><td style="width: 15%; background: #f5f5f5; padding: 10px; font-weight: bold;">실습생 성명</td><td style="width: 18%; padding: 10px;"></td><td style="width: 10%; background: #f5f5f5; padding: 10px; font-weight: bold;">소속</td><td style="padding: 10px;">________대학교 ________학과 ____학년</td></tr><tr><td style="background: #f5f5f5; padding: 10px; font-weight: bold;">실습기관</td><td style="padding: 10px;">'+ORG_CONFIG.ORG_NAME+'</td><td style="background: #f5f5f5; padding: 10px; font-weight: bold;">실습분야</td><td style="padding: 10px;"></td></tr><tr><td style="background: #f5f5f5; padding: 10px; font-weight: bold;">실습기간</td><td style="padding: 10px;"></td><td style="background: #f5f5f5; padding: 10px; font-weight: bold;">실습지도자</td><td style="padding: 10px;"></td></tr><tr><td style="background: #f5f5f5; padding: 10px; font-weight: bold;">실습내용</td><td colspan="3" style="padding: 10px;"></td></tr></table>
 <h3 style="background: #f0f7ff; padding: 8px; margin: 15px 0 10px;">1. 실습생 자기평가</h3>
 <table border="1" style="width: 100%; border-collapse: collapse; margin-bottom: 20px;"><tr style="background: #e8e8e8;"><th style="padding: 8px;">평가 항목</th><th style="padding: 8px; width: 11%;">매우좋음</th><th style="padding: 8px; width: 11%;">좋음</th><th style="padding: 8px; width: 11%;">보통</th><th style="padding: 8px; width: 11%;">나쁨</th><th style="padding: 8px; width: 11%;">매우나쁨</th></tr><tr><td style="padding: 10px;">1) 성실성 (출석상황, 과제제출 상황 등)</td><td style="padding: 10px; text-align: center;">☐</td><td style="padding: 10px; text-align: center;">☐</td><td style="padding: 10px; text-align: center;">☐</td><td style="padding: 10px; text-align: center;">☐</td><td style="padding: 10px; text-align: center;">☐</td></tr><tr><td style="padding: 10px;">2) 실습에 임하는 자세</td><td style="padding: 10px; text-align: center;">☐</td><td style="padding: 10px; text-align: center;">☐</td><td style="padding: 10px; text-align: center;">☐</td><td style="padding: 10px; text-align: center;">☐</td><td style="padding: 10px; text-align: center;">☐</td></tr><tr><td style="padding: 10px;">3) 사회복지적 가치의 실현</td><td style="padding: 10px; text-align: center;">☐</td><td style="padding: 10px; text-align: center;">☐</td><td style="padding: 10px; text-align: center;">☐</td><td style="padding: 10px; text-align: center;">☐</td><td style="padding: 10px; text-align: center;">☐</td></tr><tr><td style="padding: 10px;">4) 실습목표 달성여부</td><td style="padding: 10px; text-align: center;">☐</td><td style="padding: 10px; text-align: center;">☐</td><td style="padding: 10px; text-align: center;">☐</td><td style="padding: 10px; text-align: center;">☐</td><td style="padding: 10px; text-align: center;">☐</td></tr><tr><td style="padding: 10px;">5) 실습지도자와의 관계</td><td style="padding: 10px; text-align: center;">☐</td><td style="padding: 10px; text-align: center;">☐</td><td style="padding: 10px; text-align: center;">☐</td><td style="padding: 10px; text-align: center;">☐</td><td style="padding: 10px; text-align: center;">☐</td></tr><tr><td style="padding: 10px;">6) 실습생과의 관계</td><td style="padding: 10px; text-align: center;">☐</td><td style="padding: 10px; text-align: center;">☐</td><td style="padding: 10px; text-align: center;">☐</td><td style="padding: 10px; text-align: center;">☐</td><td style="padding: 10px; text-align: center;">☐</td></tr></table>
 <h3 style="background: #f0f7ff; padding: 8px; margin: 15px 0 10px;">2. 실습목표에 대한 평가</h3>
@@ -2232,7 +2302,7 @@ function getFormTemplate(templateType) {
     // 별지15: 실습종결평가서
     'final_evaluation': `
 <h2 style="text-align: center; margin-bottom: 20px; font-size: 1.5em;">실습 종결 평가서</h2>
-<table border="1" style="width: 100%; border-collapse: collapse; margin-bottom: 20px;"><tr><td style="width: 15%; background: #f5f5f5; padding: 10px; font-weight: bold;">실습생 성명</td><td style="width: 18%; padding: 10px;"></td><td style="width: 10%; background: #f5f5f5; padding: 10px; font-weight: bold;">소속</td><td style="padding: 10px;">________대학교 ________학과 ____학년</td></tr><tr><td style="background: #f5f5f5; padding: 10px; font-weight: bold;">실습기관</td><td style="padding: 10px;">신림종합사회복지관</td><td style="background: #f5f5f5; padding: 10px; font-weight: bold;">실습분야</td><td style="padding: 10px;"></td></tr><tr><td style="background: #f5f5f5; padding: 10px; font-weight: bold;">실습기간</td><td style="padding: 10px;"></td><td style="background: #f5f5f5; padding: 10px; font-weight: bold;">실습지도자</td><td style="padding: 10px;"></td></tr></table>
+<table border="1" style="width: 100%; border-collapse: collapse; margin-bottom: 20px;"><tr><td style="width: 15%; background: #f5f5f5; padding: 10px; font-weight: bold;">실습생 성명</td><td style="width: 18%; padding: 10px;"></td><td style="width: 10%; background: #f5f5f5; padding: 10px; font-weight: bold;">소속</td><td style="padding: 10px;">________대학교 ________학과 ____학년</td></tr><tr><td style="background: #f5f5f5; padding: 10px; font-weight: bold;">실습기관</td><td style="padding: 10px;">'+ORG_CONFIG.ORG_NAME+'</td><td style="background: #f5f5f5; padding: 10px; font-weight: bold;">실습분야</td><td style="padding: 10px;"></td></tr><tr><td style="background: #f5f5f5; padding: 10px; font-weight: bold;">실습기간</td><td style="padding: 10px;"></td><td style="background: #f5f5f5; padding: 10px; font-weight: bold;">실습지도자</td><td style="padding: 10px;"></td></tr></table>
 <h3 style="background: #f0f7ff; padding: 8px; margin: 15px 0 10px;">1. 실습생 자기평가</h3>
 <table border="1" style="width: 100%; border-collapse: collapse; margin-bottom: 20px;"><tr style="background: #e8e8e8;"><th style="padding: 8px;">평가 항목</th><th style="padding: 8px; width: 11%;">매우좋음</th><th style="padding: 8px; width: 11%;">좋음</th><th style="padding: 8px; width: 11%;">보통</th><th style="padding: 8px; width: 11%;">나쁨</th><th style="padding: 8px; width: 11%;">매우나쁨</th></tr><tr><td style="padding: 10px;">1) 성실성</td><td style="text-align: center;">☐</td><td style="text-align: center;">☐</td><td style="text-align: center;">☐</td><td style="text-align: center;">☐</td><td style="text-align: center;">☐</td></tr><tr><td style="padding: 10px;">2) 실습에 임하는 자세</td><td style="text-align: center;">☐</td><td style="text-align: center;">☐</td><td style="text-align: center;">☐</td><td style="text-align: center;">☐</td><td style="text-align: center;">☐</td></tr><tr><td style="padding: 10px;">3) 사회복지적 가치의 실현</td><td style="text-align: center;">☐</td><td style="text-align: center;">☐</td><td style="text-align: center;">☐</td><td style="text-align: center;">☐</td><td style="text-align: center;">☐</td></tr><tr><td style="padding: 10px;">4) 실습목표 달성여부</td><td style="text-align: center;">☐</td><td style="text-align: center;">☐</td><td style="text-align: center;">☐</td><td style="text-align: center;">☐</td><td style="text-align: center;">☐</td></tr><tr><td style="padding: 10px;">5) 실습지도자와의 관계</td><td style="text-align: center;">☐</td><td style="text-align: center;">☐</td><td style="text-align: center;">☐</td><td style="text-align: center;">☐</td><td style="text-align: center;">☐</td></tr><tr><td style="padding: 10px;">6) 실습생과의 관계</td><td style="text-align: center;">☐</td><td style="text-align: center;">☐</td><td style="text-align: center;">☐</td><td style="text-align: center;">☐</td><td style="text-align: center;">☐</td></tr></table>
 <h3 style="background: #f0f7ff; padding: 8px; margin: 15px 0 10px;">2. 실습목표 달성에 대한 평가</h3>
@@ -2484,8 +2554,8 @@ function getFormTemplate(templateType) {
 <h2 style="text-align: center; margin-bottom: 20px; font-size: 1.5em;">실습생 개인정보 수집·이용 동의서</h2>
 
 <div style="border: 1px solid #ccc; padding: 20px; margin-bottom: 20px; background: #fafafa; line-height: 1.8;">
-<p>- 작성하신 신청서는 <strong>신림종합사회복지관 사회복지 현장실습 신청자의 선정심사</strong>만을 위해 사용됩니다.</p>
-<p style="margin-top: 10px;">- 신림종합사회복지관은 실습생 선정에 활용하기 위하여 아래와 같이 개인정보를 수집·이용하고자 하며, 관련사항은 개인정보보호법 등 관계 법령에 따라 처리됨을 알려드리오니 아래의 각 사항을 확인하시고 동의 또는 거부하시기 바랍니다.</p>
+<p>- 작성하신 신청서는 <strong>'+ORG_CONFIG.ORG_NAME+' 사회복지 현장실습 신청자의 선정심사</strong>만을 위해 사용됩니다.</p>
+<p style="margin-top: 10px;">- '+ORG_CONFIG.ORG_NAME+'은 실습생 선정에 활용하기 위하여 아래와 같이 개인정보를 수집·이용하고자 하며, 관련사항은 개인정보보호법 등 관계 법령에 따라 처리됨을 알려드리오니 아래의 각 사항을 확인하시고 동의 또는 거부하시기 바랍니다.</p>
 </div>
 
 <div style="border: 2px solid #333; padding: 20px; margin-bottom: 20px; background: #fff;">
@@ -2493,7 +2563,7 @@ function getFormTemplate(templateType) {
 
 <h3 style="background: #f0f7ff; padding: 8px; margin: 15px 0 10px;">1. [수집·이용 목적]</h3>
 <div style="padding: 10px 15px; background: #f9f9f9; margin-bottom: 15px;">
-신림종합사회복지관 사회복지현장실습 지원자 선정심사
+'+ORG_CONFIG.ORG_NAME+' 사회복지현장실습 지원자 선정심사
 </div>
 
 <h3 style="background: #f0f7ff; padding: 8px; margin: 15px 0 10px;">2. [수집·이용 항목]</h3>
@@ -2503,7 +2573,7 @@ function getFormTemplate(templateType) {
 
 <h3 style="background: #f0f7ff; padding: 8px; margin: 15px 0 10px;">3. [보유 및 이용 기간]</h3>
 <div style="padding: 10px 15px; background: #f9f9f9; margin-bottom: 15px;">
-<p>1) 수집기간 : 신림종합사회복지관 사회복지현장실습 모집시(공고일 ~ 마감일)까지</p>
+<p>1) 수집기간 : '+ORG_CONFIG.ORG_NAME+' 사회복지현장실습 모집시(공고일 ~ 마감일)까지</p>
 <p>2) 보유 및 이용기간 : 모집 공고일부터 실습 종료시까지</p>
 </div>
 </div>
