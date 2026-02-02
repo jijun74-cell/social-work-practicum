@@ -1,0 +1,1882 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <base target="_top">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    :root {
+      --primary: #7c3aed; --primary-dark: #6d28d9; --secondary: #64748b;
+      --success: #10b981; --warning: #f59e0b; --danger: #ef4444;
+      --bg: #f8fafc; --card: #ffffff; --border: #e2e8f0; --text: #1e293b;
+    }
+    body { font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, sans-serif; background: var(--bg); color: var(--text); line-height: 1.6; }
+    .header { background: linear-gradient(135deg, var(--primary), var(--primary-dark)); color: white; padding: 1rem; position: sticky; top: 0; z-index: 100; }
+    .header-content { max-width: 1400px; margin: 0 auto; display: flex; justify-content: space-between; align-items: center; }
+    .logo { font-size: 1.25rem; font-weight: 700; display: flex; align-items: center; gap: 0.5rem; }
+    .user-info { display: flex; align-items: center; gap: 1rem; }
+    .user-info .badge { background: rgba(255,255,255,0.2); padding: 0.25rem 0.75rem; border-radius: 20px; font-size: 0.75rem; }
+    .app-container { display: flex; max-width: 1400px; margin: 0 auto; }
+    .sidebar { width: 260px; background: white; min-height: calc(100vh - 60px); border-right: 1px solid var(--border); padding: 1rem 0; position: sticky; top: 60px; }
+    .nav-section { padding: 0.5rem 1rem; font-size: 0.75rem; color: var(--secondary); text-transform: uppercase; margin-top: 1rem; }
+    .nav-item { padding: 0.875rem 1.25rem; cursor: pointer; display: flex; align-items: center; gap: 0.75rem; color: var(--text); border-left: 3px solid transparent; transition: all 0.2s; }
+    .nav-item:hover { background: var(--bg); color: var(--primary); }
+    .nav-item.active { background: #f3e8ff; color: var(--primary); border-left-color: var(--primary); }
+    .nav-item i { width: 20px; text-align: center; }
+    .main { flex: 1; padding: 1.5rem; min-height: calc(100vh - 60px); }
+    .tab-content { display: none; }
+    .tab-content.active { display: block; }
+    .card { background: var(--card); border-radius: 12px; padding: 1.5rem; margin-bottom: 1.5rem; box-shadow: 0 1px 3px rgba(0,0,0,0.1); border: 1px solid var(--border); }
+    .card-title { font-size: 1.25rem; font-weight: 700; margin-bottom: 1rem; display: flex; align-items: center; justify-content: space-between; }
+    .card-title .title-text { display: flex; align-items: center; gap: 0.5rem; }
+    .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-bottom: 1.5rem; }
+    .stat-card { background: white; border-radius: 12px; padding: 1.25rem; border: 1px solid var(--border); }
+    .stat-card .stat-value { font-size: 2rem; font-weight: 700; color: var(--primary); }
+    .stat-card .stat-label { color: var(--secondary); font-size: 0.875rem; }
+    .form-group { margin-bottom: 1.25rem; }
+    .form-label { display: block; font-weight: 600; margin-bottom: 0.5rem; }
+    .form-input, .form-select, .form-textarea { width: 100%; padding: 0.75rem 1rem; border: 1px solid var(--border); border-radius: 8px; font-size: 1rem; }
+    .form-input:focus, .form-select:focus, .form-textarea:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.1); }
+    .form-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; }
+    .btn { display: inline-flex; align-items: center; gap: 0.5rem; padding: 0.75rem 1.5rem; border: none; border-radius: 8px; font-size: 0.875rem; font-weight: 600; cursor: pointer; transition: all 0.2s; }
+    .btn-primary { background: var(--primary); color: white; }
+    .btn-primary:hover { background: var(--primary-dark); }
+    .btn-secondary { background: var(--secondary); color: white; }
+    .btn-success { background: var(--success); color: white; }
+    .btn-warning { background: var(--warning); color: white; }
+    .btn-danger { background: var(--danger); color: white; }
+    .btn-outline { background: transparent; border: 2px solid var(--primary); color: var(--primary); }
+    .btn-sm { padding: 0.5rem 1rem; font-size: 0.75rem; }
+    .btn-group { display: flex; gap: 0.5rem; flex-wrap: wrap; }
+    .badge { display: inline-flex; align-items: center; padding: 0.25rem 0.75rem; border-radius: 20px; font-size: 0.75rem; font-weight: 600; }
+    .badge-success { background: #dcfce7; color: #166534; }
+    .badge-warning { background: #fef3c7; color: #92400e; }
+    .badge-danger { background: #fee2e2; color: #991b1b; }
+    .badge-info { background: #dbeafe; color: #1e40af; }
+    .badge-purple { background: #f3e8ff; color: #6b21a8; }
+    .table-container { overflow-x: auto; }
+    .table { width: 100%; border-collapse: collapse; }
+    .table th, .table td { padding: 0.875rem 1rem; text-align: left; border-bottom: 1px solid var(--border); }
+    .table th { background: var(--bg); font-weight: 600; color: var(--secondary); font-size: 0.875rem; }
+    .table tr:hover { background: var(--bg); }
+    .table input[type="checkbox"] { width: 18px; height: 18px; }
+    .modal-overlay { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 1000; align-items: center; justify-content: center; }
+    .modal-overlay.active { display: flex; }
+    .modal { background: white; border-radius: 16px; width: 90%; max-width: 800px; max-height: 90vh; overflow-y: auto; }
+    .modal-header { padding: 1.25rem 1.5rem; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; background: white; z-index: 10; }
+    .modal-title { font-size: 1.25rem; font-weight: 700; }
+    .modal-close { background: none; border: none; font-size: 1.5rem; cursor: pointer; color: var(--secondary); }
+    .modal-body { padding: 1.5rem; }
+    .modal-footer { padding: 1rem 1.5rem; border-top: 1px solid var(--border); display: flex; justify-content: flex-end; gap: 0.75rem; }
+    .scoring-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 0.5rem; margin-bottom: 1rem; }
+    .scoring-item { text-align: center; }
+    .scoring-item label { display: block; font-size: 0.75rem; color: var(--secondary); margin-bottom: 0.5rem; }
+    .scoring-item input { width: 60px; padding: 0.5rem; text-align: center; border: 1px solid var(--border); border-radius: 6px; }
+    .file-upload { border: 2px dashed var(--border); border-radius: 12px; padding: 2rem; text-align: center; cursor: pointer; }
+    .file-upload:hover { border-color: var(--primary); background: #faf5ff; }
+    .file-upload input { display: none; }
+    .file-info { display: flex; align-items: center; justify-content: space-between; padding: 0.75rem 1rem; background: var(--bg); border-radius: 8px; margin-top: 1rem; }
+    .alert { padding: 1rem 1.25rem; border-radius: 8px; margin-bottom: 1rem; display: flex; align-items: flex-start; gap: 0.75rem; }
+    .alert-info { background: #eff6ff; color: #1e40af; border: 1px solid #bfdbfe; }
+    .alert-success { background: #f0fdf4; color: #166534; border: 1px solid #bbf7d0; }
+    .alert-warning { background: #fffbeb; color: #92400e; border: 1px solid #fde68a; }
+    .alert-danger { background: #fef2f2; color: #991b1b; border: 1px solid #fecaca; }
+    .pagination { display: flex; justify-content: center; gap: 0.5rem; margin-top: 1.5rem; }
+    .page-btn { padding: 0.5rem 1rem; border: 1px solid var(--border); background: white; border-radius: 6px; cursor: pointer; }
+    .page-btn:hover, .page-btn.active { background: var(--primary); color: white; border-color: var(--primary); }
+    .empty-state { text-align: center; padding: 3rem 1rem; color: var(--secondary); }
+    .empty-state i { font-size: 3rem; margin-bottom: 1rem; opacity: 0.5; }
+    .loading { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(255,255,255,0.8); z-index: 2000; align-items: center; justify-content: center; }
+    .loading.active { display: flex; }
+    .spinner { width: 50px; height: 50px; border: 4px solid var(--border); border-top-color: var(--primary); border-radius: 50%; animation: spin 1s linear infinite; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .toast-container { position: fixed; bottom: 1.5rem; right: 1.5rem; z-index: 3000; }
+    .toast { background: #1e293b; color: white; padding: 1rem 1.5rem; border-radius: 8px; margin-top: 0.5rem; animation: slideIn 0.3s ease; display: flex; align-items: center; gap: 0.75rem; }
+    @keyframes slideIn { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+    .consent-box { background: var(--bg); border: 1px solid var(--border); border-radius: 8px; padding: 1.25rem; max-height: 300px; overflow-y: auto; margin-bottom: 1rem; font-size: 0.875rem; }
+    .inner-tabs { display: flex; gap: 0.5rem; margin-bottom: 1rem; border-bottom: 1px solid var(--border); padding-bottom: 0.5rem; }
+    .inner-tab { padding: 0.5rem 1rem; cursor: pointer; border-radius: 6px; font-weight: 500; }
+    .inner-tab:hover { background: var(--bg); }
+    .inner-tab.active { background: var(--primary); color: white; }
+    .detail-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1rem; }
+    .detail-item { padding: 1rem; background: var(--bg); border-radius: 8px; }
+    .detail-item .label { font-size: 0.75rem; color: var(--secondary); margin-bottom: 0.25rem; }
+    .detail-item .value { font-weight: 600; }
+    @media (max-width: 1024px) {
+      .sidebar { display: none; }
+      .app-container { flex-direction: column; }
+      .mobile-nav { display: block; background: white; border-bottom: 1px solid var(--border); overflow-x: auto; white-space: nowrap; padding: 0.5rem; }
+      .mobile-nav .nav-item { display: inline-flex; border-left: none; border-radius: 6px; }
+    }
+    @media (min-width: 1025px) { .mobile-nav { display: none; } }
+  </style>
+</head>
+<body>
+  <div class="loading" id="loading"><div class="spinner"></div></div>
+  <div class="toast-container" id="toastContainer"></div>
+  
+  <header class="header">
+    <div class="header-content">
+      <div class="logo"><i class="fas fa-user-tie"></i><span>사회복지현장실습 관리</span></div>
+      <div class="user-info"><span class="badge">슈퍼바이저</span><span id="userEmail"></span></div>
+    </div>
+  </header>
+  
+  <div class="mobile-nav" id="mobileNav"></div>
+  
+  <div class="app-container">
+    <nav class="sidebar" id="sidebar">
+      <div class="nav-section">설정</div>
+      <div class="nav-item active" data-tab="settings"><i class="fas fa-cog"></i> 기간 설정</div>
+      <div class="nav-item" data-tab="supervisors"><i class="fas fa-user-shield"></i> 슈퍼바이저 관리</div>
+      <div class="nav-section">모집 관리</div>
+      <div class="nav-item" data-tab="applications"><i class="fas fa-file-alt"></i> 신청서 관리</div>
+      <div class="nav-item" data-tab="scoring"><i class="fas fa-star"></i> 채점</div>
+      <div class="nav-item" data-tab="pass"><i class="fas fa-trophy"></i> 합격자 관리</div>
+      <div class="nav-item" data-tab="report"><i class="fas fa-file-pdf"></i> 보고서 출력</div>
+      <div class="nav-section">실습 관리</div>
+      <div class="nav-item" data-tab="notices"><i class="fas fa-bullhorn"></i> 공지사항</div>
+      <div class="nav-item" data-tab="forms"><i class="fas fa-folder-open"></i> 실습서식</div>
+      <div class="nav-item" data-tab="attendance"><i class="fas fa-clock"></i> 출석 관리</div>
+      <div class="nav-item" data-tab="submissions"><i class="fas fa-tasks"></i> 과제 확인</div>
+      <div class="nav-item" data-tab="satisfaction"><i class="fas fa-chart-bar"></i> 만족도 결과</div>
+      <div class="nav-section">기타</div>
+      <div class="nav-item" data-tab="students"><i class="fas fa-users"></i> 실습생 정보</div>
+    </nav>
+    
+    <main class="main">
+      <div class="tab-content active" id="tabSettings">
+        <div class="card">
+          <h2 class="card-title"><span class="title-text"><i class="fas fa-cog"></i> 기간 설정</span>
+            <button class="btn btn-outline btn-sm" onclick="initializeSystem()"><i class="fas fa-sync"></i> 시스템 초기화</button>
+            <button class="btn btn-outline btn-sm" onclick="runDebugCheck()" style="margin-left: 5px;"><i class="fas fa-bug"></i> 데이터 확인</button>
+            <button class="btn btn-outline btn-sm" onclick="fixFilePermissions()" style="margin-left: 5px;"><i class="fas fa-unlock"></i> 파일권한 수정</button>
+          </h2>
+          <div id="settingsContent"></div>
+        </div>
+      </div>
+      
+      <div class="tab-content" id="tabApplications">
+        <div class="stats-grid" id="applicationStats"></div>
+        <div class="card">
+          <h2 class="card-title"><span class="title-text"><i class="fas fa-file-alt"></i> 신청서 목록</span>
+            <select class="form-select" style="width: auto;" id="applicationFilter" onchange="loadApplications()">
+              <option value="">전체</option><option value="접수완료">접수완료</option><option value="1차합격">1차합격</option><option value="최종합격">최종합격</option><option value="불합격">불합격</option>
+            </select>
+          </h2>
+          <div id="applicationList"></div>
+        </div>
+      </div>
+      
+      <div class="tab-content" id="tabSupervisors">
+        <div class="card">
+          <h2 class="card-title"><span class="title-text"><i class="fas fa-user-shield"></i> 슈퍼바이저 관리</span>
+            <button class="btn btn-primary btn-sm" onclick="openSupervisorModal()"><i class="fas fa-plus"></i> 슈퍼바이저 추가</button>
+          </h2>
+          <div class="alert alert-info"><i class="fas fa-info-circle"></i> 슈퍼바이저 시트에 등록된 계정만 슈퍼바이저 앱에 접근할 수 있습니다.</div>
+          <div id="supervisorList"></div>
+        </div>
+      </div>
+      
+      <div class="tab-content" id="tabScoring">
+        <div class="card"><h2 class="card-title"><span class="title-text"><i class="fas fa-star"></i> 신청서 채점</span></h2><div id="scoringList"></div></div>
+        <div class="card" style="margin-top: 1.5rem;"><h2 class="card-title"><span class="title-text"><i class="fas fa-history"></i> 전체 채점 이력</span></h2><div id="myScoringHistory"></div></div>
+      </div>
+      
+      <div class="tab-content" id="tabPass">
+        <div class="card">
+          <h2 class="card-title"><span class="title-text"><i class="fas fa-trophy"></i> 합격자 관리</span></h2>
+          <div class="inner-tabs">
+            <div class="inner-tab active" data-stage="1차" onclick="loadPassManagement('1차')">1차 선발</div>
+            <div class="inner-tab" data-stage="최종" onclick="loadPassManagement('최종')">최종 선발</div>
+            <div class="inner-tab" data-stage="부서배정" onclick="loadDepartmentAssignment()">부서 배정</div>
+          </div>
+          <div id="passContent"></div>
+        </div>
+      </div>
+      
+      <div class="tab-content" id="tabReport">
+        <div class="card">
+          <h2 class="card-title"><span class="title-text"><i class="fas fa-file-pdf"></i> 실습생 선발 보고서</span>
+            <div style="display: flex; gap: 10px;">
+              <select class="form-select" id="reportYear" style="width: auto;" onchange="loadReportData()">
+              </select>
+              <button class="btn btn-primary btn-sm" onclick="printReport()"><i class="fas fa-print"></i> 인쇄/PDF</button>
+            </div>
+          </h2>
+          <div id="reportContent"></div>
+        </div>
+      </div>
+      
+      <div class="tab-content" id="tabNotices">
+        <div class="card">
+          <h2 class="card-title"><span class="title-text"><i class="fas fa-bullhorn"></i> 공지사항</span>
+            <button class="btn btn-primary btn-sm" onclick="openNoticeModal()"><i class="fas fa-plus"></i> 새 공지</button>
+          </h2>
+          <div id="noticeList"></div>
+          <div class="pagination" id="noticePagination"></div>
+        </div>
+      </div>
+      
+      <div class="tab-content" id="tabForms">
+        <div class="card">
+          <h2 class="card-title"><span class="title-text"><i class="fas fa-folder-open"></i> 실습서식 관리</span>
+            <button class="btn btn-primary btn-sm" onclick="openFormUploadModal()"><i class="fas fa-upload"></i> 서식 업로드</button>
+          </h2>
+          <div id="formsList"></div>
+        </div>
+      </div>
+      
+      <div class="tab-content" id="tabAttendance">
+        <div class="card">
+          <h2 class="card-title"><span class="title-text"><i class="fas fa-clock"></i> 출석 현황</span></h2>
+          <div class="form-row" style="margin-bottom: 1rem; align-items: flex-end;">
+            <div class="form-group" style="margin-bottom: 0;">
+              <label class="form-label">시작일</label>
+              <input type="date" class="form-input" id="attendanceStart">
+            </div>
+            <div class="form-group" style="margin-bottom: 0;">
+              <label class="form-label">종료일</label>
+              <input type="date" class="form-input" id="attendanceEnd">
+            </div>
+            <button class="btn btn-primary" onclick="loadAttendance()"><i class="fas fa-search"></i> 조회</button>
+            <button class="btn btn-outline" onclick="openAttendancePrintModal()"><i class="fas fa-print"></i> 출석부 출력</button>
+          </div>
+          <div id="attendanceList"></div>
+        </div>
+      </div>
+      
+      <div class="tab-content" id="tabSubmissions">
+        <div class="card"><h2 class="card-title"><span class="title-text"><i class="fas fa-tasks"></i> 과제 제출 목록</span></h2><div id="submissionList"></div></div>
+      </div>
+      
+      <div class="tab-content" id="tabSatisfaction">
+        <div class="card"><h2 class="card-title"><span class="title-text"><i class="fas fa-chart-bar"></i> 만족도 조사 결과</span></h2><div id="satisfactionResults"></div></div>
+      </div>
+      
+      <div class="tab-content" id="tabStudents">
+        <div class="card">
+          <h2 class="card-title"><span class="title-text"><i class="fas fa-users"></i> 실습생 정보 및 부서 배정</span></h2>
+          <div class="alert alert-info"><i class="fas fa-info-circle"></i> 최종합격자에게 실습 부서를 배정합니다. 배정된 부서의 슈퍼바이저에게 과제 제출 알림이 발송됩니다.</div>
+          <div id="studentsList"></div>
+        </div>
+      </div>
+    </main>
+  </div>
+  
+  <!-- 출석부 출력 모달 -->
+  <div class="modal-overlay" id="attendancePrintModal">
+    <div class="modal" style="max-width: 500px;">
+      <div class="modal-header">
+        <h3 class="modal-title">출석부 출력</h3>
+        <button class="modal-close" onclick="closeModal('attendancePrintModal')">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label class="form-label">실습생 선택</label>
+          <select class="form-select" id="printStudentSelect">
+            <option value="">로딩 중...</option>
+          </select>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">시작일</label>
+            <input type="date" class="form-input" id="printStartDate">
+          </div>
+          <div class="form-group">
+            <label class="form-label">종료일</label>
+            <input type="date" class="form-input" id="printEndDate">
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-outline" onclick="closeModal('attendancePrintModal')">취소</button>
+        <button class="btn btn-primary" onclick="printAttendanceReport()"><i class="fas fa-file-pdf"></i> PDF 생성</button>
+      </div>
+    </div>
+  </div>
+  
+  <!-- 슈퍼바이저 추가/수정 모달 -->
+  <div class="modal-overlay" id="supervisorModal">
+    <div class="modal" style="max-width: 500px;">
+      <div class="modal-header"><h3 class="modal-title" id="supervisorModalTitle">슈퍼바이저 추가</h3><button class="modal-close" onclick="closeModal('supervisorModal')">&times;</button></div>
+      <div class="modal-body">
+        <form id="supervisorForm">
+          <input type="hidden" id="supervisorId">
+          <div class="form-group"><label class="form-label">이름 <span style="color:red;">*</span></label><input type="text" class="form-input" id="supervisorName" required></div>
+          <div class="form-group"><label class="form-label">부서 <span style="color:red;">*</span></label>
+            <select class="form-select" id="supervisorDept" required>
+              <option value="">선택</option>
+              <option value="마을이음1팀">마을이음1팀</option>
+              <option value="마을이음2팀">마을이음2팀</option>
+              <option value="마을이음3팀">마을이음3팀</option>
+              <option value="어르신돌봄팀">어르신돌봄팀</option>
+            </select>
+          </div>
+          <div class="form-group"><label class="form-label">직위</label><input type="text" class="form-input" id="supervisorPosition" placeholder="예: 사회복지사, 팀장"></div>
+          <div class="form-group"><label class="form-label">이메일 <span style="color:red;">*</span></label><input type="email" class="form-input" id="supervisorEmail" placeholder="example@sillym.or.kr" required></div>
+          <div class="form-group" style="display:flex; align-items:center; gap:0.5rem;">
+            <input type="checkbox" id="supervisorActive" checked style="width:18px; height:18px;">
+            <label for="supervisorActive">활성화 (슈퍼바이저 앱 접근 허용)</label>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer"><button class="btn btn-secondary" onclick="closeModal('supervisorModal')">취소</button><button class="btn btn-primary" onclick="saveSupervisor()">저장</button></div>
+    </div>
+  </div>
+  
+  <!-- 부서 배정 모달 -->
+  <div class="modal-overlay" id="assignDeptModal">
+    <div class="modal" style="max-width: 400px;">
+      <div class="modal-header"><h3 class="modal-title">부서 배정</h3><button class="modal-close" onclick="closeModal('assignDeptModal')">&times;</button></div>
+      <div class="modal-body">
+        <input type="hidden" id="assignStudentId">
+        <p style="margin-bottom: 1rem;"><strong id="assignStudentName"></strong> 실습생의 부서를 배정합니다.</p>
+        <div class="form-group">
+          <label class="form-label">배정 부서 <span style="color:var(--danger)">*</span></label>
+          <select class="form-select" id="assignDept">
+            <option value="">부서 선택</option>
+            <option value="마을이음1팀">마을이음1팀</option>
+            <option value="마을이음2팀">마을이음2팀</option>
+            <option value="마을이음3팀">마을이음3팀</option>
+            <option value="어르신돌봄팀">어르신돌봄팀</option>
+          </select>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" onclick="closeModal('assignDeptModal')">취소</button>
+        <button class="btn btn-primary" onclick="saveAssignDept()"><i class="fas fa-check"></i> 배정</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 개인정보보호 동의 모달 -->
+  <div class="modal-overlay" id="consentModal">
+    <div class="modal">
+      <div class="modal-header"><h3 class="modal-title">개인정보보호 취급 주의사항 동의</h3><button class="modal-close" onclick="closeModal('consentModal')">&times;</button></div>
+      <div class="modal-body">
+        <div class="consent-box">
+          <h4>개인정보보호 취급 주의사항</h4><br>
+          <p>실습생의 개인정보를 취급함에 있어 다음 사항을 준수합니다.</p><br>
+          <strong>1. 수집된 개인정보의 이용 목적</strong><p>실습생 선발, 실습 운영, 실습보험 가입 등 실습 관련 업무에만 사용합니다.</p><br>
+          <strong>2. 개인정보의 보호</strong><p>실습생의 개인정보가 외부에 유출되지 않도록 철저히 관리합니다.</p><br>
+          <strong>3. 제3자 제공 제한</strong><p>실습생의 동의 없이 개인정보를 제3자에게 제공하지 않습니다.</p><br>
+          <strong>4. 개인정보의 파기</strong><p>보유 기간 경과 후 지체 없이 파기합니다.</p><br>
+          <strong>5. 비밀유지 의무</strong><p>업무상 알게 된 실습생의 개인정보에 대해 비밀을 유지합니다.</p>
+        </div>
+        <div style="display: flex; align-items: flex-start; gap: 0.75rem; margin-top: 1rem;">
+          <input type="checkbox" id="supervisorConsent" style="margin-top: 0.25rem; width: 18px; height: 18px;">
+          <label for="supervisorConsent">위 주의사항을 확인하였으며, 개인정보보호 취급에 동의합니다.</label>
+        </div>
+      </div>
+      <div class="modal-footer"><button class="btn btn-primary" onclick="submitSupervisorConsent()">동의 후 계속</button></div>
+    </div>
+  </div>
+  
+  <!-- 공지사항 작성 모달 -->
+  <div class="modal-overlay" id="noticeModal">
+    <div class="modal">
+      <div class="modal-header"><h3 class="modal-title" id="noticeModalTitle">새 공지사항</h3><button class="modal-close" onclick="closeModal('noticeModal')">&times;</button></div>
+      <div class="modal-body">
+        <form id="noticeForm">
+          <input type="hidden" id="noticeId">
+          <div class="form-group"><label class="form-label">제목</label><input type="text" class="form-input" id="noticeTitle" required></div>
+          <div class="form-group"><label class="form-label">내용</label><textarea class="form-textarea" id="noticeContent" style="min-height: 200px;" required></textarea></div>
+          <div class="form-group"><label class="form-label">대상</label><select class="form-select" id="noticeTarget"><option value="전체">전체</option><option value="실습생">실습생</option></select></div>
+          <div class="form-group">
+            <label class="form-label">첨부파일</label>
+            <div class="file-upload" onclick="document.getElementById('noticeFile').click()">
+              <i class="fas fa-cloud-upload-alt" style="font-size: 2rem; color: var(--secondary);"></i><p>클릭하여 파일 선택</p>
+              <input type="file" id="noticeFile">
+            </div>
+            <div id="noticeFileInfo"></div>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer"><button class="btn btn-secondary" onclick="closeModal('noticeModal')">취소</button><button class="btn btn-primary" onclick="saveNotice()">저장</button></div>
+    </div>
+  </div>
+  
+  <!-- 서식 업로드 모달 -->
+  <div class="modal-overlay" id="formUploadModal">
+    <div class="modal" style="max-width: 500px;">
+      <div class="modal-header"><h3 class="modal-title" id="formUploadModalTitle">실습서식 업로드</h3><button class="modal-close" onclick="closeModal('formUploadModal')">&times;</button></div>
+      <div class="modal-body">
+        <form id="formUploadForm">
+          <input type="hidden" id="editFormId">
+          <div class="form-group"><label class="form-label">서식명 <span style="color: var(--danger);">*</span></label><input type="text" class="form-input" id="formName" placeholder="예: 실습일지 양식" required></div>
+          <div class="form-group">
+            <label class="form-label">서식 유형 <span style="color: var(--danger);">*</span></label>
+            <select class="form-select" id="formType" required>
+              <option value="">유형 선택</option>
+              <option value="사전과제">사전과제</option>
+              <option value="실습계약">실습계약</option>
+              <option value="실습일지">실습일지</option>
+              <option value="실습평가">실습평가</option>
+              <option value="사례관리">사례관리</option>
+              <option value="프로그램">프로그램</option>
+              <option value="회의">회의</option>
+              <option value="기타">기타</option>
+            </select>
+          </div>
+          <div class="form-group"><label class="form-label">설명</label><input type="text" class="form-input" id="formDescription" placeholder="간단한 설명"></div>
+          <div class="form-group" id="formFileGroup">
+            <label class="form-label">파일 <span style="color: var(--danger);">*</span></label>
+            <div class="file-upload" onclick="document.getElementById('formFile').click()">
+              <i class="fas fa-file-alt" style="font-size: 2rem; color: var(--secondary);"></i><p>클릭하여 파일 선택</p>
+              <input type="file" id="formFile">
+            </div>
+            <div id="formFileInfo"></div>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer"><button class="btn btn-secondary" onclick="closeModal('formUploadModal')">취소</button><button class="btn btn-primary" id="formUploadBtn" onclick="uploadForm()">업로드</button></div>
+    </div>
+  </div>
+  
+  <!-- 신청서 상세 모달 -->
+  <div class="modal-overlay" id="applicationModal">
+    <div class="modal">
+      <div class="modal-header"><h3 class="modal-title">신청서 상세</h3><button class="modal-close" onclick="closeModal('applicationModal')">&times;</button></div>
+      <div class="modal-body" id="applicationDetail"></div>
+      <div class="modal-footer"><button class="btn btn-secondary" onclick="closeModal('applicationModal')">닫기</button></div>
+    </div>
+  </div>
+  
+  <!-- 채점 모달 -->
+  <div class="modal-overlay" id="scoringModal">
+    <div class="modal" style="max-width: 900px;">
+      <div class="modal-header"><h3 class="modal-title">채점</h3><button class="modal-close" onclick="closeModal('scoringModal')">&times;</button></div>
+      <div class="modal-body">
+        <div id="scoringApplicantInfo"></div>
+        <hr style="margin: 1rem 0;">
+        
+        <!-- 기존 채점 결과 -->
+        <div id="existingScoringResults" style="margin-bottom: 1.5rem;"></div>
+        
+        <h4 style="margin-bottom: 1rem;"><i class="fas fa-edit"></i> 내 채점 입력</h4>
+        <form id="scoringForm">
+          <input type="hidden" id="scoringApplicationId">
+          <div class="form-group"><label class="form-label">채점 단계</label><select class="form-select" id="scoringStage"><option value="1차">1차 (서류)</option><option value="2차">2차 (면접)</option></select></div>
+          <div class="form-group">
+            <label class="form-label">점수 (각 항목 20점 만점)</label>
+            <div class="scoring-grid">
+              <div class="scoring-item"><label>동기</label><input type="number" id="score1" min="0" max="20" value="0" onchange="updateTotalScore()"></div>
+              <div class="scoring-item"><label>자기소개</label><input type="number" id="score2" min="0" max="20" value="0" onchange="updateTotalScore()"></div>
+              <div class="scoring-item"><label>적합성</label><input type="number" id="score3" min="0" max="20" value="0" onchange="updateTotalScore()"></div>
+              <div class="scoring-item"><label>성실성</label><input type="number" id="score4" min="0" max="20" value="0" onchange="updateTotalScore()"></div>
+              <div class="scoring-item"><label>발전가능성</label><input type="number" id="score5" min="0" max="20" value="0" onchange="updateTotalScore()"></div>
+            </div>
+            <div style="text-align: right; font-weight: bold;">총점: <span id="totalScore">0</span>/100</div>
+          </div>
+          <div class="form-group"><label class="form-label">의견</label><textarea class="form-textarea" id="scoringComment" placeholder="채점 의견을 입력하세요."></textarea></div>
+        </form>
+      </div>
+      <div class="modal-footer"><button class="btn btn-secondary" onclick="closeModal('scoringModal')">취소</button><button class="btn btn-primary" onclick="saveScoring()">저장</button></div>
+    </div>
+  </div>
+  
+  <!-- 과제 상세 모달 -->
+  <div class="modal-overlay" id="submissionModal">
+    <div class="modal">
+      <div class="modal-header"><h3 class="modal-title">과제 상세</h3><button class="modal-close" onclick="closeModal('submissionModal')">&times;</button></div>
+      <div class="modal-body" id="submissionDetail"></div>
+      <div class="modal-footer"><button class="btn btn-secondary" onclick="closeModal('submissionModal')">닫기</button><button class="btn btn-success" id="confirmSubmissionBtn" onclick="confirmSubmission()">확인 완료</button></div>
+    </div>
+  </div>
+  
+  <script>
+    let currentYear = new Date().getFullYear();
+    let applications = [];
+    let selectedApplicationId = null;
+    let selectedSubmissionId = null;
+    let noticePage = 1;
+    let formsData = []; // 서식 데이터 저장용
+    
+    document.addEventListener('DOMContentLoaded', function() {
+      initApp();
+      setupNavigation();
+      setupFileInputs();
+      setupScoreInputs();
+    });
+    
+    function initApp() {
+      showLoading(true);
+      // 설정을 미리 로드
+      google.script.run.withSuccessHandler(function(settings) {
+        window.appSettings = settings || {};
+      }).getSettings(currentYear);
+      
+      google.script.run.withSuccessHandler(function(status) {
+        // 테스트 모드 표시
+        if (status.isTestMode) {
+          document.getElementById('userEmail').innerHTML = `<span class="badge" style="background: #ef4444; margin-left: 0.5rem;">테스트</span> ${status.user.email}`;
+        } else {
+          document.getElementById('userEmail').textContent = status.user.email;
+        }
+        google.script.run.withSuccessHandler(function(hasConsent) {
+          showLoading(false);
+          if (!hasConsent) { openModal('consentModal'); } else { loadSettingsTab(); }
+        }).withFailureHandler(handleError).checkSupervisorConsent();
+      }).withFailureHandler(handleError).getAppStatus();
+    }
+    
+    function setupNavigation() {
+      const navItems = document.querySelectorAll('.nav-item');
+      navItems.forEach(item => {
+        item.addEventListener('click', function() {
+          navItems.forEach(i => i.classList.remove('active'));
+          document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+          this.classList.add('active');
+          const tabId = 'tab' + this.dataset.tab.charAt(0).toUpperCase() + this.dataset.tab.slice(1);
+          document.getElementById(tabId).classList.add('active');
+          loadTabContent(this.dataset.tab);
+        });
+      });
+      const mobileNav = document.getElementById('mobileNav');
+      mobileNav.innerHTML = Array.from(navItems).map(item => `<div class="nav-item ${item.classList.contains('active') ? 'active' : ''}" data-tab="${item.dataset.tab}">${item.innerHTML}</div>`).join('');
+      mobileNav.querySelectorAll('.nav-item').forEach(item => {
+        item.addEventListener('click', function() {
+          document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
+          document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+          document.querySelectorAll(`[data-tab="${this.dataset.tab}"]`).forEach(i => i.classList.add('active'));
+          const tabId = 'tab' + this.dataset.tab.charAt(0).toUpperCase() + this.dataset.tab.slice(1);
+          document.getElementById(tabId).classList.add('active');
+          loadTabContent(this.dataset.tab);
+        });
+      });
+    }
+    
+    function setupFileInputs() {
+      document.getElementById('noticeFile').addEventListener('change', function(e) {
+        const file = e.target.files[0];
+        if (file) { document.getElementById('noticeFileInfo').innerHTML = `<div class="file-info"><span><i class="fas fa-file"></i> ${file.name}</span><button type="button" class="btn btn-danger btn-sm" onclick="clearNoticeFile()"><i class="fas fa-times"></i></button></div>`; }
+      });
+      document.getElementById('formFile').addEventListener('change', function(e) {
+        const file = e.target.files[0];
+        if (file) { document.getElementById('formFileInfo').innerHTML = `<div class="file-info"><span><i class="fas fa-file"></i> ${file.name}</span><button type="button" class="btn btn-danger btn-sm" onclick="clearFormFile()"><i class="fas fa-times"></i></button></div>`; }
+      });
+    }
+    
+    function setupScoreInputs() {
+      for (let i = 1; i <= 5; i++) { document.getElementById('score' + i).addEventListener('input', updateTotalScore); }
+    }
+    
+    function updateTotalScore() {
+      let total = 0;
+      for (let i = 1; i <= 5; i++) { total += parseInt(document.getElementById('score' + i).value) || 0; }
+      document.getElementById('totalScore').textContent = total;
+    }
+    
+    function loadTabContent(tab) {
+      switch(tab) {
+        case 'settings': loadSettingsTab(); break;
+        case 'supervisors': loadSupervisors(); break;
+        case 'applications': loadApplications(); break;
+        case 'scoring': loadScoringTab(); break;
+        case 'pass': loadPassManagement('1차'); break;
+        case 'report': loadReportTab(); break;
+        case 'notices': loadNotices(1); break;
+        case 'forms': loadForms(); break;
+        case 'attendance': loadAttendance(); break;
+        case 'submissions': loadSubmissions(); break;
+        case 'satisfaction': loadSatisfaction(); break;
+        case 'students': loadStudents(); break;
+      }
+    }
+    
+    function loadSettingsTab() {
+      google.script.run.withSuccessHandler(function(settings) {
+        settings = settings || {};
+        window.appSettings = settings; // 전역 변수에 저장
+        document.getElementById('settingsContent').innerHTML = `
+          <form id="settingsForm" onsubmit="saveSettings(event)">
+            <div class="form-row"><div class="form-group"><label class="form-label">연도</label><input type="number" class="form-input" name="year" value="${settings.year || currentYear}" required></div></div>
+            <h4 style="margin: 1.5rem 0 1rem;">모집 기간</h4>
+            <div class="form-row">
+              <div class="form-group"><label class="form-label">시작일</label><input type="date" class="form-input" name="recruitStart" value="${settings.recruitStart || ''}"></div>
+              <div class="form-group"><label class="form-label">종료일</label><input type="date" class="form-input" name="recruitEnd" value="${settings.recruitEnd || ''}"></div>
+            </div>
+            <h4 style="margin: 1.5rem 0 1rem;">실습 기간</h4>
+            <div class="form-row">
+              <div class="form-group"><label class="form-label">시작일</label><input type="date" class="form-input" name="practiceStart" value="${settings.practiceStart || ''}"></div>
+              <div class="form-group"><label class="form-label">종료일</label><input type="date" class="form-input" name="practiceEnd" value="${settings.practiceEnd || ''}"></div>
+            </div>
+            <h4 style="margin: 1.5rem 0 1rem;"><i class="fas fa-user-check" style="color: var(--success);"></i> 합격자 로그인 기간</h4>
+            <p style="font-size: 0.85rem; color: var(--secondary); margin-bottom: 1rem;">최종합격자가 출석, 과제제출 등 기능을 사용하기 위해 로그인할 수 있는 기간입니다.</p>
+            <div class="form-row">
+              <div class="form-group"><label class="form-label">시작일</label><input type="date" class="form-input" name="loginStart" value="${settings.loginStart || ''}"></div>
+              <div class="form-group"><label class="form-label">종료일</label><input type="date" class="form-input" name="loginEnd" value="${settings.loginEnd || ''}"></div>
+            </div>
+            <h4 style="margin: 1.5rem 0 1rem;">앱 설정</h4>
+            <div class="form-group"><label style="display: flex; align-items: center; gap: 0.75rem; cursor: pointer;"><input type="checkbox" name="appActive" ${settings.appActive ? 'checked' : ''} style="width: 20px; height: 20px;"> 실습생 앱 활성화</label></div>
+            <div class="form-group"><label style="display: flex; align-items: center; gap: 0.75rem; cursor: pointer;"><input type="checkbox" name="resultsPublic" ${settings.resultsPublic ? 'checked' : ''} style="width: 20px; height: 20px;"> 합격자 공개</label></div>
+            <div class="form-group"><label style="display: flex; align-items: center; gap: 0.75rem; cursor: pointer;"><input type="checkbox" name="satisfactionActive" ${settings.satisfactionActive ? 'checked' : ''} style="width: 20px; height: 20px;"> 만족도 조사 활성화</label></div>
+            <h4 style="margin: 1.5rem 0 1rem;">희망 실습분야 설정</h4>
+            <div class="form-group">
+              <label class="form-label">실습분야 목록 <small style="color: var(--secondary);">(콤마로 구분하여 입력)</small></label>
+              <input type="text" class="form-input" name="practiceFields" value="${settings.practiceFields || ''}" placeholder="예: 사례관리, 프로그램, 행정지원, 상담">
+              <small style="color: var(--secondary); margin-top: 0.25rem; display: block;">신청서에서 선택 가능한 실습분야 목록입니다.</small>
+            </div>
+            <button type="submit" class="btn btn-primary" style="margin-top: 1rem;"><i class="fas fa-save"></i> 설정 저장</button>
+          </form>`;
+      }).withFailureHandler(handleError).getSettings(currentYear);
+    }
+    
+    function saveSettings(e) {
+      e.preventDefault();
+      const form = document.getElementById('settingsForm');
+      const settings = { 
+        year: parseInt(form.year.value), 
+        recruitStart: form.recruitStart.value, 
+        recruitEnd: form.recruitEnd.value, 
+        practiceStart: form.practiceStart.value, 
+        practiceEnd: form.practiceEnd.value, 
+        loginStart: form.loginStart.value,
+        loginEnd: form.loginEnd.value,
+        appActive: form.appActive.checked, 
+        resultsPublic: form.resultsPublic.checked, 
+        satisfactionActive: form.satisfactionActive.checked,
+        practiceFields: form.practiceFields.value
+      };
+      showLoading(true);
+      google.script.run.withSuccessHandler(function(result) { showLoading(false); if (result.success) { showToast('설정이 저장되었습니다.', 'success'); } }).withFailureHandler(handleError).saveSettings(settings);
+    }
+    
+    function initializeSystem() {
+      if (!confirm('시스템을 초기화하시겠습니까?')) return;
+      showLoading(true);
+      google.script.run.withSuccessHandler(function(result) { showLoading(false); if (result.success) { showToast('시스템이 초기화되었습니다.', 'success'); } }).withFailureHandler(handleError).initializeSystem();
+    }
+    
+    function runDebugCheck() {
+      showLoading(true);
+      google.script.run.withSuccessHandler(function(result) {
+        showLoading(false);
+        console.log('Debug result:', JSON.stringify(result, null, 2));
+        
+        var msg = '=== 디버그 결과 ===\n\n';
+        msg += '■ 사용자 정보\n';
+        msg += '  이메일: ' + result.email + '\n';
+        msg += '  테스트계정: ' + result.isTestAccount + '\n';
+        msg += '  슈퍼바이저: ' + result.isSupervisor + '\n';
+        msg += '  현재연도: ' + result.currentYear + '\n\n';
+        
+        msg += '■ 스프레드시트\n';
+        msg += '  설정ID: ' + result.configSpreadsheetId + '\n';
+        msg += '  이름: ' + (result.spreadsheetName || 'ERROR') + '\n';
+        msg += '  시트목록: ' + (result.sheetNames ? result.sheetNames.join(', ') : 'ERROR') + '\n\n';
+        
+        msg += '■ 공지사항 (' + (result.notices ? result.notices.sheetName : 'N/A') + ')\n';
+        if (result.notices) {
+          msg += '  데이터 수: ' + result.notices.count + '\n';
+          msg += '  헤더: ' + (result.notices.headers ? result.notices.headers.join(', ') : 'N/A') + '\n';
+          if (result.notices.sampleData) {
+            msg += '  샘플 ID: ' + result.notices.sampleData.id + '\n';
+            msg += '  샘플 제목: ' + result.notices.sampleData.title + '\n';
+            msg += '  샘플 대상: [' + result.notices.sampleData.target + '] (길이:' + result.notices.sampleData.targetLength + ')\n';
+            msg += '  대상(trim): [' + result.notices.sampleData.targetTrimmed + ']\n';
+          }
+          if (result.notices.testGetNotices) {
+            msg += '  ★ getNotices("실습생") 결과: ' + result.notices.testGetNotices.totalCount + '건\n';
+          }
+          if (result.notices.testGetNoticesAll) {
+            msg += '  ★ getNotices(전체) 결과: ' + result.notices.testGetNoticesAll.totalCount + '건\n';
+          }
+        }
+        msg += '\n';
+        
+        msg += '■ 출석부 (' + (result.attendance ? result.attendance.sheetName : 'N/A') + ')\n';
+        if (result.attendance) {
+          msg += '  데이터 수: ' + result.attendance.count + '\n';
+          if (result.attendance.sampleData) {
+            msg += '  샘플 연도: ' + result.attendance.sampleData.year + ' (타입: ' + result.attendance.sampleData.yearType + ')\n';
+            msg += '  샘플 날짜: ' + result.attendance.sampleData.date + '\n';
+          }
+        }
+        msg += '\n';
+        
+        msg += '■ 과제제출 (' + (result.submissions ? result.submissions.sheetName : 'N/A') + ')\n';
+        if (result.submissions) {
+          msg += '  데이터 수: ' + result.submissions.count + '\n';
+          if (result.submissions.sampleData) {
+            msg += '  샘플 연도: ' + result.submissions.sampleData.year + ' (타입: ' + result.submissions.sampleData.yearType + ')\n';
+            msg += '  샘플 제목: ' + result.submissions.sampleData.title + '\n';
+          }
+        }
+        
+        alert(msg);
+      }).withFailureHandler(handleError).debugCheckData();
+    }
+    
+    function fixFilePermissions() {
+      if (!confirm('모든 파일의 공유 권한을 수정하시겠습니까?\n(링크가 있는 모든 사용자가 볼 수 있도록 설정됩니다)')) return;
+      showLoading(true);
+      google.script.run.withSuccessHandler(function(result) {
+        showLoading(false);
+        if (result.success) {
+          showToast(result.message, 'success');
+        } else {
+          showToast(result.message, 'error');
+        }
+      }).withFailureHandler(handleError).fixAllFilePermissions();
+    }
+    
+    function loadApplications() {
+      const filter = document.getElementById('applicationFilter')?.value || '';
+      console.log('loadApplications called - currentYear:', currentYear, 'filter:', filter);
+      showLoading(true);
+      google.script.run.withSuccessHandler(function(data) {
+        showLoading(false);
+        console.log('loadApplications response:', data);
+        data = data || [];
+        applications = data;
+        const stats = { total: data.length, pending: data.filter(a => a['상태'] === '접수완료').length, firstPass: data.filter(a => a['상태'] === '1차합격').length, finalPass: data.filter(a => a['상태'] === '최종합격').length };
+        document.getElementById('applicationStats').innerHTML = `<div class="stat-card"><div class="stat-value">${stats.total}</div><div class="stat-label">총 신청</div></div><div class="stat-card"><div class="stat-value">${stats.pending}</div><div class="stat-label">심사 대기</div></div><div class="stat-card"><div class="stat-value">${stats.firstPass}</div><div class="stat-label">1차 합격</div></div><div class="stat-card"><div class="stat-value">${stats.finalPass}</div><div class="stat-label">최종 합격</div></div>`;
+        const container = document.getElementById('applicationList');
+        if (data.length === 0) { container.innerHTML = `<div class="empty-state"><i class="fas fa-inbox"></i><p>신청서가 없습니다.</p></div>`; return; }
+        container.innerHTML = `<div class="table-container"><table class="table"><thead><tr><th>신청일</th><th>이름</th><th>학교</th><th>학과</th><th>연락처</th><th>상태</th><th>관리</th></tr></thead><tbody>${data.map(app => `<tr><td>${app['신청일시']?.substring(0, 10) || '-'}</td><td><strong>${app['이름']}</strong></td><td>${app['학교']}</td><td>${app['학과']}</td><td>${app['연락처']}</td><td><span class="badge ${getStatusBadge(app['상태'])}">${app['상태']}</span></td><td><button class="btn btn-outline btn-sm" onclick="viewApplication('${app['ID']}')"><i class="fas fa-eye"></i></button>${app['신청서파일ID'] ? `<button class="btn btn-outline btn-sm" onclick="downloadFile('${app['신청서파일ID']}')"><i class="fas fa-file-pdf"></i></button>` : ''}</td></tr>`).join('')}</tbody></table></div>`;
+      }).withFailureHandler(function(error) {
+        showLoading(false);
+        console.error('loadApplications error:', error);
+        handleError(error);
+      }).getApplications(currentYear, filter);
+    }
+    
+    function viewApplication(id) {
+      const app = applications.find(a => a['ID'] === id);
+      if (!app) return;
+      document.getElementById('applicationDetail').innerHTML = `<div class="detail-grid"><div class="detail-item"><div class="label">이름</div><div class="value">${app['이름']}</div></div><div class="detail-item"><div class="label">생년월일</div><div class="value">${app['생년월일']}</div></div><div class="detail-item"><div class="label">성별</div><div class="value">${app['성별']}</div></div><div class="detail-item"><div class="label">연락처</div><div class="value">${app['연락처']}</div></div><div class="detail-item"><div class="label">이메일</div><div class="value">${app['이메일']}</div></div><div class="detail-item"><div class="label">학교</div><div class="value">${app['학교']}</div></div><div class="detail-item"><div class="label">학과</div><div class="value">${app['학과']}</div></div><div class="detail-item"><div class="label">학년</div><div class="value">${app['학년']}</div></div><div class="detail-item"><div class="label">실습지원분야</div><div class="value">${app['실습지원분야'] || '-'}</div></div></div><h4 style="margin: 1.5rem 0 0.5rem;">실습동기</h4><div style="background: var(--bg); padding: 1rem; border-radius: 8px; white-space: pre-wrap;">${app['실습동기'] || '없음'}</div><h4 style="margin: 1.5rem 0 0.5rem;">자기소개</h4><div style="background: var(--bg); padding: 1rem; border-radius: 8px; white-space: pre-wrap;">${app['자기소개'] || '없음'}</div><h4 style="margin: 1.5rem 0 0.5rem;">자원봉사 경험</h4><div style="background: var(--bg); padding: 1rem; border-radius: 8px; white-space: pre-wrap;">${app['자원봉사경험'] || '없음'}</div><h4 style="margin: 1.5rem 0 0.5rem;">이전 실습 경험</h4><div style="background: var(--bg); padding: 1rem; border-radius: 8px; white-space: pre-wrap;">${app['이전실습경험'] || '없음'}</div><h4 style="margin: 1.5rem 0 0.5rem;">특기사항</h4><div style="background: var(--bg); padding: 1rem; border-radius: 8px; white-space: pre-wrap;">${app['특기사항'] || '없음'}</div>`;
+      openModal('applicationModal');
+    }
+    
+    function loadScoringTab() {
+      showLoading(true);
+      google.script.run.withSuccessHandler(function(data) {
+        showLoading(false);
+        data = data || [];
+        applications = data;
+        const container = document.getElementById('scoringList');
+        if (data.length === 0) { container.innerHTML = `<div class="empty-state"><i class="fas fa-inbox"></i><p>채점할 신청서가 없습니다.</p></div>`; return; }
+        container.innerHTML = `<div class="table-container"><table class="table"><thead><tr><th>이름</th><th>학교</th><th>학과</th><th>상태</th><th>채점</th></tr></thead><tbody>${data.filter(a => a['상태'] === '접수완료' || a['상태'] === '1차합격').map(app => `<tr><td><strong>${app['이름']}</strong></td><td>${app['학교']}</td><td>${app['학과']}</td><td><span class="badge ${getStatusBadge(app['상태'])}">${app['상태']}</span></td><td><button class="btn btn-primary btn-sm" onclick="openScoringModal('${app['ID']}')"><i class="fas fa-star"></i> 채점</button></td></tr>`).join('')}</tbody></table></div>`;
+      }).withFailureHandler(handleError).getApplications(currentYear, '');
+      
+      // 내 채점 이력 불러오기
+      loadMyScoringHistory();
+    }
+    
+    function loadMyScoringHistory() {
+      const container = document.getElementById('myScoringHistory');
+      container.innerHTML = '<p style="color: var(--secondary);"><i class="fas fa-spinner fa-spin"></i> 채점 이력 불러오는 중...</p>';
+      
+      google.script.run.withSuccessHandler(function(history) {
+        if (!history || history.length === 0) {
+          container.innerHTML = '<div class="empty-state"><i class="fas fa-clipboard-list"></i><p>아직 채점 기록이 없습니다.</p></div>';
+          return;
+        }
+        
+        let html = '<div class="table-container"><table class="table"><thead><tr><th>채점자</th><th>신청자</th><th>학교</th><th>단계</th><th>동기</th><th>자기소개</th><th>적합성</th><th>성실성</th><th>발전가능성</th><th>총점</th><th>채점일</th></tr></thead><tbody>';
+        history.forEach(function(item) {
+          const rowStyle = item.isMyScore ? 'background: #e8f5e9;' : '';
+          html += '<tr style="' + rowStyle + '">';
+          html += '<td>' + (item.isMyScore ? '<strong style="color: var(--primary);">' + (item.scorerName || '-') + ' (나)</strong>' : (item.scorerName || '-')) + '</td>';
+          html += '<td><strong>' + (item.applicantName || '-') + '</strong></td>';
+          html += '<td>' + (item.school || '-') + '</td>';
+          html += '<td><span class="badge ' + (item.stage === '1차' ? 'badge-info' : 'badge-primary') + '">' + item.stage + '</span></td>';
+          html += '<td>' + (item.scores[0] || 0) + '</td>';
+          html += '<td>' + (item.scores[1] || 0) + '</td>';
+          html += '<td>' + (item.scores[2] || 0) + '</td>';
+          html += '<td>' + (item.scores[3] || 0) + '</td>';
+          html += '<td>' + (item.scores[4] || 0) + '</td>';
+          html += '<td><strong>' + item.total + '</strong></td>';
+          html += '<td>' + (item.scoredDate || '-') + '</td>';
+          html += '</tr>';
+        });
+        html += '</tbody></table></div>';
+        
+        // 통계 추가
+        const myScores = history.filter(h => h.isMyScore);
+        const otherScores = history.filter(h => !h.isMyScore);
+        html += '<div class="stats-grid" style="margin-top: 1rem;">';
+        html += '<div class="stat-card"><div class="stat-value">' + history.length + '</div><div class="stat-label">전체 채점</div></div>';
+        html += '<div class="stat-card" style="background: #e8f5e9;"><div class="stat-value">' + myScores.length + '</div><div class="stat-label">내 채점</div></div>';
+        html += '<div class="stat-card"><div class="stat-value">' + otherScores.length + '</div><div class="stat-label">다른 슈퍼바이저</div></div>';
+        html += '</div>';
+        
+        container.innerHTML = html;
+      }).withFailureHandler(function(error) {
+        container.innerHTML = '<div class="alert alert-warning"><i class="fas fa-exclamation-triangle"></i> 채점 이력을 불러올 수 없습니다.</div>';
+      }).getMyScoringHistory(currentYear);
+    }
+    
+    function openScoringModal(id) {
+      selectedApplicationId = id;
+      const app = applications.find(a => a['ID'] === id);
+      document.getElementById('scoringApplicantInfo').innerHTML = `<div class="detail-grid"><div class="detail-item"><div class="label">이름</div><div class="value">${app['이름']}</div></div><div class="detail-item"><div class="label">학교</div><div class="value">${app['학교']}</div></div><div class="detail-item"><div class="label">학과</div><div class="value">${app['학과']}</div></div></div>`;
+      document.getElementById('scoringApplicationId').value = id;
+      document.getElementById('scoringStage').value = app['상태'] === '1차합격' ? '2차' : '1차';
+      for (let i = 1; i <= 5; i++) { document.getElementById('score' + i).value = 0; }
+      document.getElementById('totalScore').textContent = '0';
+      document.getElementById('scoringComment').value = '';
+      
+      document.getElementById('existingScoringResults').innerHTML = '<p style="color: var(--secondary);"><i class="fas fa-spinner fa-spin"></i> 채점 결과 불러오는 중...</p>';
+      google.script.run.withSuccessHandler(function(results) {
+        const container = document.getElementById('existingScoringResults');
+        if (!results || results.length === 0) {
+          container.innerHTML = '<div class="alert alert-info"><i class="fas fa-info-circle"></i> 아직 채점 기록이 없습니다.</div>';
+        } else {
+          const firstStage = results.filter(r => r.stage === '1차');
+          const secondStage = results.filter(r => r.stage === '2차');
+          
+          let html = '<h4 style="margin-bottom: 0.75rem;"><i class="fas fa-history"></i> 기존 채점 결과</h4>';
+          
+          if (firstStage.length > 0) {
+            html += '<div style="margin-bottom: 1rem;"><strong>1차 채점</strong>';
+            html += '<div class="table-container"><table class="table"><thead><tr><th>채점자</th><th>동기</th><th>자기소개</th><th>적합성</th><th>성실성</th><th>발전가능성</th><th>총점</th><th>의견</th></tr></thead><tbody>';
+            firstStage.forEach(r => {
+              html += `<tr><td>${r.scorerName}</td><td>${r.scores[0]}</td><td>${r.scores[1]}</td><td>${r.scores[2]}</td><td>${r.scores[3]}</td><td>${r.scores[4]}</td><td><strong>${r.total}</strong></td><td>${r.comment || '-'}</td></tr>`;
+            });
+            const avgFirst = Math.round(firstStage.reduce((sum, r) => sum + r.total, 0) / firstStage.length);
+            html += `<tr style="background: var(--bg);"><td colspan="6" style="text-align:right;"><strong>평균</strong></td><td><strong>${avgFirst}</strong></td><td></td></tr>`;
+            html += '</tbody></table></div></div>';
+          }
+          
+          if (secondStage.length > 0) {
+            html += '<div style="margin-bottom: 1rem;"><strong>2차 채점</strong>';
+            html += '<div class="table-container"><table class="table"><thead><tr><th>채점자</th><th>동기</th><th>자기소개</th><th>적합성</th><th>성실성</th><th>발전가능성</th><th>총점</th><th>의견</th></tr></thead><tbody>';
+            secondStage.forEach(r => {
+              html += `<tr><td>${r.scorerName}</td><td>${r.scores[0]}</td><td>${r.scores[1]}</td><td>${r.scores[2]}</td><td>${r.scores[3]}</td><td>${r.scores[4]}</td><td><strong>${r.total}</strong></td><td>${r.comment || '-'}</td></tr>`;
+            });
+            const avgSecond = Math.round(secondStage.reduce((sum, r) => sum + r.total, 0) / secondStage.length);
+            html += `<tr style="background: var(--bg);"><td colspan="6" style="text-align:right;"><strong>평균</strong></td><td><strong>${avgSecond}</strong></td><td></td></tr>`;
+            html += '</tbody></table></div></div>';
+          }
+          
+          container.innerHTML = html;
+        }
+      }).withFailureHandler(function(error) {
+        document.getElementById('existingScoringResults').innerHTML = '<div class="alert alert-warning"><i class="fas fa-exclamation-triangle"></i> 채점 결과를 불러올 수 없습니다.</div>';
+      }).getScoring(id);
+      
+      openModal('scoringModal');
+    }
+    
+    function saveScoring() {
+      const applicationId = document.getElementById('scoringApplicationId').value;
+      const stage = document.getElementById('scoringStage').value;
+      const scores = [];
+      for (let i = 1; i <= 5; i++) { scores.push(parseInt(document.getElementById('score' + i).value) || 0); }
+      const comment = document.getElementById('scoringComment').value;
+      showLoading(true);
+      google.script.run.withSuccessHandler(function(result) { showLoading(false); if (result.success) { showToast('채점이 저장되었습니다.', 'success'); closeModal('scoringModal'); loadMyScoringHistory(); } }).withFailureHandler(handleError).submitScoring(applicationId, stage, scores, comment);
+    }
+    
+    function loadPassManagement(stage) {
+      document.querySelectorAll('.inner-tab').forEach(t => t.classList.remove('active'));
+      document.querySelector(`.inner-tab[data-stage="${stage}"]`).classList.add('active');
+      showLoading(true);
+      google.script.run.withSuccessHandler(function(data) {
+        showLoading(false);
+        data = data || [];
+        applications = data;
+        const container = document.getElementById('passContent');
+        const filterStatus = stage === '1차' ? '접수완료' : '1차합격';
+        const filtered = data.filter(a => a['상태'] === filterStatus);
+        if (filtered.length === 0) { container.innerHTML = `<div class="alert alert-info"><i class="fas fa-info-circle"></i>${stage === '1차' ? '심사 대기 중인 신청서가 없습니다.' : '1차 합격자가 없습니다.'}</div>`; return; }
+        container.innerHTML = `<div class="alert alert-info"><i class="fas fa-info-circle"></i>합격자를 선택한 후 '합격 확정' 버튼을 클릭하세요.</div><div class="table-container"><table class="table"><thead><tr><th><input type="checkbox" id="selectAll" onchange="toggleSelectAll(this)"></th><th>이름</th><th>학교</th><th>학과</th><th>연락처</th></tr></thead><tbody>${filtered.map(app => `<tr><td><input type="checkbox" class="select-app" value="${app['ID']}"></td><td><strong>${app['이름']}</strong></td><td>${app['학교']}</td><td>${app['학과']}</td><td>${app['연락처']}</td></tr>`).join('')}</tbody></table></div><div style="margin-top: 1.5rem; text-align: right;"><button class="btn btn-success" onclick="confirmPass('${stage}')"><i class="fas fa-check"></i> ${stage} 합격 확정</button></div>`;
+      }).withFailureHandler(handleError).getApplications(currentYear, '');
+    }
+    
+    function toggleSelectAll(checkbox) { document.querySelectorAll('.select-app').forEach(c => c.checked = checkbox.checked); }
+    
+    function confirmPass(stage) {
+      const selected = Array.from(document.querySelectorAll('.select-app:checked')).map(c => c.value);
+      if (selected.length === 0) { showToast('합격자를 선택해주세요.', 'warning'); return; }
+      if (!confirm(`선택한 ${selected.length}명을 ${stage} 합격 처리하시겠습니까?`)) return;
+      showLoading(true);
+      if (stage === '1차') {
+        google.script.run.withSuccessHandler(function(result) { showLoading(false); if (result.success) { showToast(`${result.count}명의 1차 합격이 확정되었습니다.`, 'success'); loadPassManagement('1차'); } }).withFailureHandler(handleError).confirmFirstPassAndNotify(selected);
+      } else {
+        google.script.run.withSuccessHandler(function(result) { showLoading(false); if (result.success) { showToast(`${result.count}명의 최종 합격이 확정되었습니다.`, 'success'); loadPassManagement('최종'); } }).withFailureHandler(handleError).confirmFinalPassAndNotify(selected);
+      }
+    }
+    
+    function loadDepartmentAssignment() {
+      document.querySelectorAll('.inner-tab').forEach(t => t.classList.remove('active'));
+      document.querySelector('.inner-tab[data-stage="부서배정"]').classList.add('active');
+      showLoading(true);
+      google.script.run.withSuccessHandler(function(data) {
+        showLoading(false);
+        data = data || [];
+        const container = document.getElementById('passContent');
+        
+        if (data.length === 0) {
+          container.innerHTML = `<div class="alert alert-info"><i class="fas fa-info-circle"></i> 최종 합격자가 없습니다.</div>`;
+          return;
+        }
+        
+        container.innerHTML = `
+          <div class="alert alert-info"><i class="fas fa-info-circle"></i> 최종합격자에게 실습 부서를 배정합니다.</div>
+          <div class="table-container">
+            <table class="table">
+              <thead>
+                <tr>
+                  <th>이름</th>
+                  <th>학교</th>
+                  <th>학과</th>
+                  <th>현재 배정</th>
+                  <th>부서 배정</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${data.map(s => `
+                  <tr>
+                    <td><strong>${s.name}</strong></td>
+                    <td>${s.school}</td>
+                    <td>${s.department}</td>
+                    <td>${s.assignedDepartment ? `<span class="badge badge-success">${s.assignedDepartment}</span>` : '<span class="badge badge-warning">미배정</span>'}</td>
+                    <td>
+                      <select class="form-select" style="width: auto; min-width: 150px;" onchange="quickAssignDept('${s.id}', this.value)">
+                        <option value="">부서 선택</option>
+                        <option value="마을이음1팀" ${s.assignedDepartment === '마을이음1팀' ? 'selected' : ''}>마을이음1팀</option>
+                        <option value="마을이음2팀" ${s.assignedDepartment === '마을이음2팀' ? 'selected' : ''}>마을이음2팀</option>
+                        <option value="마을이음3팀" ${s.assignedDepartment === '마을이음3팀' ? 'selected' : ''}>마을이음3팀</option>
+                        <option value="어르신돌봄팀" ${s.assignedDepartment === '어르신돌봄팀' ? 'selected' : ''}>어르신돌봄팀</option>
+                      </select>
+                    </td>
+                  </tr>
+                `).join('')}
+              </tbody>
+            </table>
+          </div>
+        `;
+      }).withFailureHandler(handleError).getStudents(currentYear);
+    }
+    
+    function quickAssignDept(studentId, dept) {
+      if (!dept) return;
+      showLoading(true);
+      google.script.run.withSuccessHandler(function(result) {
+        showLoading(false);
+        if (result.success) {
+          showToast('부서가 배정되었습니다.', 'success');
+          loadDepartmentAssignment();
+        } else {
+          showToast(result.message || '오류가 발생했습니다.', 'error');
+        }
+      }).withFailureHandler(handleError).assignDepartment(studentId, dept);
+    }
+    
+    function loadNotices(page) {
+      noticePage = page;
+      google.script.run.withSuccessHandler(function(result) {
+        result = result || { items: [], totalPages: 0 };
+        const container = document.getElementById('noticeList');
+        if (!result.items || result.items.length === 0) { container.innerHTML = `<div class="empty-state"><i class="fas fa-inbox"></i><p>공지사항이 없습니다.</p></div>`; document.getElementById('noticePagination').innerHTML = ''; return; }
+        container.innerHTML = `<div class="table-container"><table class="table"><thead><tr><th style="width: 50%;">제목</th><th>대상</th><th>작성일</th><th>조회</th><th>관리</th></tr></thead><tbody>${result.items.map(n => `<tr><td>${n.title}${n.fileId ? ' <i class="fas fa-paperclip" style="color: var(--secondary);"></i>' : ''}</td><td><span class="badge badge-purple">${n.target}</span></td><td>${n.createdAt.substring(0, 10)}</td><td>${n.views}</td><td><button class="btn btn-outline btn-sm" onclick="editNotice('${n.id}')"><i class="fas fa-edit"></i></button><button class="btn btn-danger btn-sm" onclick="deleteNotice('${n.id}')"><i class="fas fa-trash"></i></button></td></tr>`).join('')}</tbody></table></div>`;
+        if (result.totalPages > 1) {
+          let html = '';
+          for (let i = 1; i <= result.totalPages; i++) { html += `<button class="page-btn ${i === page ? 'active' : ''}" onclick="loadNotices(${i})">${i}</button>`; }
+          document.getElementById('noticePagination').innerHTML = html;
+        } else { document.getElementById('noticePagination').innerHTML = ''; }
+      }).withFailureHandler(handleError).getNotices(page, 10, null);
+    }
+    
+    function openNoticeModal(notice) {
+      document.getElementById('noticeId').value = notice?.id || '';
+      document.getElementById('noticeTitle').value = notice?.title || '';
+      document.getElementById('noticeContent').value = notice?.content || '';
+      document.getElementById('noticeTarget').value = notice?.target || '전체';
+      document.getElementById('noticeFile').value = '';
+      document.getElementById('noticeFileInfo').innerHTML = '';
+      document.getElementById('noticeModalTitle').textContent = notice ? '공지사항 수정' : '새 공지사항';
+      openModal('noticeModal');
+    }
+    
+    function editNotice(id) { google.script.run.withSuccessHandler(function(notice) { openNoticeModal(notice); }).withFailureHandler(handleError).getNotice(id); }
+    function clearNoticeFile() { document.getElementById('noticeFile').value = ''; document.getElementById('noticeFileInfo').innerHTML = ''; }
+    
+    function saveNotice() {
+      const id = document.getElementById('noticeId').value;
+      const title = document.getElementById('noticeTitle').value;
+      const content = document.getElementById('noticeContent').value;
+      const target = document.getElementById('noticeTarget').value;
+      const fileInput = document.getElementById('noticeFile');
+      const file = fileInput.files[0];
+      if (!title || !content) { showToast('제목과 내용을 입력해주세요.', 'warning'); return; }
+      showLoading(true);
+      const processNotice = function(fileId, fileName) {
+        if (id) {
+          google.script.run.withSuccessHandler(function(result) { showLoading(false); if (result.success) { showToast('공지사항이 수정되었습니다.', 'success'); closeModal('noticeModal'); loadNotices(noticePage); } }).withFailureHandler(handleError).updateNotice(id, title, content, fileId, fileName);
+        } else {
+          google.script.run.withSuccessHandler(function(result) { showLoading(false); if (result.success) { showToast('공지사항이 등록되었습니다.', 'success'); closeModal('noticeModal'); loadNotices(1); } }).withFailureHandler(handleError).createNotice(title, content, fileId, fileName, target);
+        }
+      };
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          const base64 = e.target.result.split(',')[1];
+          const mimeType = file.type || 'application/octet-stream';
+          google.script.run.withSuccessHandler(function(result) { if (result.success) { processNotice(result.fileId, file.name); } else { showLoading(false); showToast(result.message, 'error'); } }).withFailureHandler(handleError).uploadFile(file.name, base64, mimeType, '공지사항첨부');
+        };
+        reader.readAsDataURL(file);
+      } else { processNotice(null, null); }
+    }
+    
+    function deleteNotice(id) {
+      if (!confirm('이 공지사항을 삭제하시겠습니까?')) return;
+      showLoading(true);
+      google.script.run.withSuccessHandler(function(result) { showLoading(false); if (result.success) { showToast('공지사항이 삭제되었습니다.', 'success'); loadNotices(noticePage); } }).withFailureHandler(handleError).deleteNotice(id);
+    }
+    
+    // ==================== 실습서식 관리 ====================
+    function loadForms() {
+      google.script.run.withSuccessHandler(function(forms) {
+        forms = forms || [];
+        formsData = forms; // 데이터 저장
+        const container = document.getElementById('formsList');
+        if (forms.length === 0) { 
+          container.innerHTML = `<div class="empty-state"><i class="fas fa-folder-open"></i><p>등록된 서식이 없습니다.</p></div>`; 
+          return; 
+        }
+        container.innerHTML = `
+          <div class="table-container">
+            <table class="table">
+              <thead>
+                <tr>
+                  <th>서식명</th>
+                  <th>유형</th>
+                  <th>설명</th>
+                  <th>등록자</th>
+                  <th>등록일</th>
+                  <th>다운로드</th>
+                  <th>관리</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${forms.map(f => {
+                  const safeName = (f.name || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+                  const safeType = (f.type || '일반').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+                  const safeDesc = (f.description || '-').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+                  const safeUploader = (f.uploader || '-').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+                  return `
+                  <tr>
+                    <td><strong>${safeName}</strong></td>
+                    <td><span class="badge badge-info">${safeType}</span></td>
+                    <td>${safeDesc}</td>
+                    <td>${safeUploader}</td>
+                    <td>${(f.uploadedAt || '').substring(0, 10) || '-'}</td>
+                    <td>${f.downloads || 0}</td>
+                    <td>
+                      ${f.fileId ? `<button class="btn btn-outline btn-sm" onclick="downloadFile('${f.fileId}')" title="다운로드"><i class="fas fa-download"></i></button>` : ''}
+                      <button class="btn btn-outline btn-sm" onclick="editForm('${f.id}')" title="수정"><i class="fas fa-edit"></i></button>
+                      <button class="btn btn-danger btn-sm" onclick="deleteForm('${f.id}', '${safeName}')" title="삭제"><i class="fas fa-trash"></i></button>
+                    </td>
+                  </tr>
+                `}).join('')}
+              </tbody>
+            </table>
+          </div>
+        `;
+      }).withFailureHandler(handleError).getForms();
+    }
+    
+    function openFormUploadModal(isEdit) {
+      document.getElementById('editFormId').value = '';
+      document.getElementById('formName').value = '';
+      document.getElementById('formType').value = '';
+      document.getElementById('formDescription').value = '';
+      document.getElementById('formFile').value = '';
+      document.getElementById('formFileInfo').innerHTML = '';
+      document.getElementById('formUploadModalTitle').textContent = '실습서식 업로드';
+      document.getElementById('formUploadBtn').textContent = '업로드';
+      document.getElementById('formUploadBtn').onclick = uploadForm;
+      document.getElementById('formFileGroup').style.display = 'block';
+      document.getElementById('formFile').required = true;
+      openModal('formUploadModal');
+    }
+    
+    function editForm(formId) {
+      const form = formsData.find(f => f.id === formId);
+      if (!form) {
+        showToast('서식 정보를 찾을 수 없습니다.', 'error');
+        return;
+      }
+      
+      document.getElementById('editFormId').value = formId;
+      document.getElementById('formName').value = form.name || '';
+      document.getElementById('formType').value = form.type || '';
+      document.getElementById('formDescription').value = form.description || '';
+      document.getElementById('formFile').value = '';
+      document.getElementById('formFileInfo').innerHTML = form.fileName ? 
+        `<div class="file-info"><span><i class="fas fa-file"></i> 현재 파일: ${form.fileName}</span></div>` : '';
+      document.getElementById('formUploadModalTitle').textContent = '실습서식 수정';
+      document.getElementById('formUploadBtn').textContent = '수정';
+      document.getElementById('formUploadBtn').onclick = saveFormEdit;
+      document.getElementById('formFileGroup').style.display = 'none'; // 파일 변경 불가
+      document.getElementById('formFile').required = false;
+      openModal('formUploadModal');
+    }
+    
+    function saveFormEdit() {
+      const formId = document.getElementById('editFormId').value;
+      const name = document.getElementById('formName').value.trim();
+      const formType = document.getElementById('formType').value;
+      const description = document.getElementById('formDescription').value.trim();
+      
+      if (!name || !formType) { 
+        showToast('서식명과 유형을 입력해주세요.', 'warning'); 
+        return; 
+      }
+      
+      showLoading(true);
+      google.script.run.withSuccessHandler(function(result) {
+        showLoading(false);
+        if (result.success) {
+          showToast('서식이 수정되었습니다.', 'success');
+          closeModal('formUploadModal');
+          loadForms();
+        } else {
+          showToast(result.message || '오류가 발생했습니다.', 'error');
+        }
+      }).withFailureHandler(handleError).updateForm(formId, name, formType, description);
+    }
+    
+    function clearFormFile() { 
+      document.getElementById('formFile').value = ''; 
+      document.getElementById('formFileInfo').innerHTML = ''; 
+    }
+    
+    function uploadForm() {
+      const name = document.getElementById('formName').value.trim();
+      const formType = document.getElementById('formType').value;
+      const description = document.getElementById('formDescription').value.trim();
+      const fileInput = document.getElementById('formFile');
+      const file = fileInput.files[0];
+      
+      if (!name || !formType || !file) { 
+        showToast('서식명, 유형, 파일을 모두 입력해주세요.', 'warning'); 
+        return; 
+      }
+      
+      showLoading(true);
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        const base64 = e.target.result.split(',')[1];
+        const mimeType = file.type || 'application/octet-stream';
+        google.script.run.withSuccessHandler(function(uploadResult) {
+          if (uploadResult.success) {
+            google.script.run.withSuccessHandler(function(result) { 
+              showLoading(false); 
+              if (result.success) { 
+                showToast('서식이 업로드되었습니다.', 'success'); 
+                closeModal('formUploadModal'); 
+                loadForms(); 
+              } else {
+                showToast(result.message || '오류가 발생했습니다.', 'error');
+              }
+            }).withFailureHandler(handleError).uploadForm(name, formType, description, uploadResult.fileId, file.name);
+          } else { 
+            showLoading(false); 
+            showToast(uploadResult.message, 'error'); 
+          }
+        }).withFailureHandler(handleError).uploadFile(file.name, base64, mimeType, '실습서식');
+      };
+      reader.readAsDataURL(file);
+    }
+    
+    function deleteForm(formId, formName) {
+      if (!confirm(`'${formName}' 서식을 삭제하시겠습니까?`)) return;
+      showLoading(true);
+      google.script.run.withSuccessHandler(function(result) {
+        showLoading(false);
+        if (result.success) {
+          showToast('서식이 삭제되었습니다.', 'success');
+          loadForms();
+        } else {
+          showToast(result.message || '오류가 발생했습니다.', 'error');
+        }
+      }).withFailureHandler(handleError).deleteForm(formId);
+    }
+    
+    function loadAttendance() {
+      const startInput = document.getElementById('attendanceStart');
+      const endInput = document.getElementById('attendanceEnd');
+      
+      // 기본값: 설정의 실습기간 또는 3개월 전부터 오늘까지
+      if (!startInput.value) {
+        if (window.appSettings && window.appSettings.practiceStart) {
+          startInput.value = window.appSettings.practiceStart;
+        } else {
+          const now = new Date();
+          const threeMonthsAgo = new Date(now.getFullYear(), now.getMonth() - 3, 1);
+          startInput.value = formatDateForInput(threeMonthsAgo);
+        }
+      }
+      if (!endInput.value) {
+        if (window.appSettings && window.appSettings.practiceEnd) {
+          endInput.value = window.appSettings.practiceEnd;
+        } else {
+          const now = new Date();
+          endInput.value = formatDateForInput(now);
+        }
+      }
+      
+      const startDate = startInput.value;
+      const endDate = endInput.value;
+      
+      console.log('loadAttendance - startDate:', startDate, 'endDate:', endDate, 'currentYear:', currentYear);
+      
+      showLoading(true);
+      google.script.run.withSuccessHandler(function(records) {
+        showLoading(false);
+        console.log('loadAttendance - received records:', records);
+        console.log('loadAttendance - records length:', records ? records.length : 'null');
+        
+        const container = document.getElementById('attendanceList');
+        if (!records || records.length === 0) { 
+          container.innerHTML = `<div class="empty-state"><i class="fas fa-calendar-times"></i><p>해당 기간의 출석 기록이 없습니다.</p></div>`; 
+          return; 
+        }
+        
+        // 이름별 그룹화
+        const grouped = {};
+        records.forEach(r => { 
+          if (!grouped[r.name]) { grouped[r.name] = []; } 
+          grouped[r.name].push(r); 
+        });
+        
+        // 총 근무시간 계산
+        let summaryHtml = '';
+        Object.entries(grouped).forEach(([name, recs]) => {
+          let totalMinutes = 0;
+          recs.forEach(r => {
+            if (r.checkin && r.checkout) {
+              const [inH, inM] = r.checkin.split(':').map(Number);
+              const [outH, outM] = r.checkout.split(':').map(Number);
+              const minutes = (outH * 60 + outM) - (inH * 60 + inM);
+              if (minutes > 0) totalMinutes += minutes;
+            }
+          });
+          const hours = Math.floor(totalMinutes / 60);
+          const mins = totalMinutes % 60;
+          summaryHtml += `<div class="stat-card"><div class="stat-label">${name}</div><div class="stat-value">${recs.length}일</div><div style="font-size: 0.85rem; color: var(--secondary);">${hours}시간 ${mins}분</div></div>`;
+        });
+        
+        container.innerHTML = `
+          <div class="table-container">
+            <table class="table">
+              <thead>
+                <tr><th>실습생</th><th>날짜</th><th>출근</th><th>퇴근</th><th>근무시간</th><th>출근위치</th></tr>
+              </thead>
+              <tbody>
+                ${records.map(r => {
+                  let workTime = '-';
+                  if (r.checkin && r.checkout) {
+                    const [inH, inM] = r.checkin.split(':').map(Number);
+                    const [outH, outM] = r.checkout.split(':').map(Number);
+                    const minutes = (outH * 60 + outM) - (inH * 60 + inM);
+                    if (minutes > 0) workTime = Math.floor(minutes / 60) + 'h ' + (minutes % 60) + 'm';
+                  }
+                  return `<tr>
+                    <td><strong>${r.name}</strong></td>
+                    <td>${r.date}</td>
+                    <td>${r.checkin || '-'}</td>
+                    <td>${r.checkout || '-'}</td>
+                    <td>${workTime}</td>
+                    <td style="max-width: 200px; overflow: hidden; text-overflow: ellipsis;">${r.checkinLocation || '-'}</td>
+                  </tr>`;
+                }).join('')}
+              </tbody>
+            </table>
+          </div>
+          <h4 style="margin: 2rem 0 1rem;">출석 요약</h4>
+          <div class="stats-grid">${summaryHtml}</div>`;
+      }).withFailureHandler(function(error) {
+        showLoading(false);
+        console.error('loadAttendance error:', error);
+        handleError(error);
+      }).getAllAttendance(currentYear, startDate, endDate);
+    }
+    
+    function formatDateForInput(date) {
+      return date.getFullYear() + '-' + String(date.getMonth() + 1).padStart(2, '0') + '-' + String(date.getDate()).padStart(2, '0');
+    }
+    
+    function openAttendancePrintModal() {
+      // 실습생 목록 로드
+      console.log('openAttendancePrintModal - loading students...');
+      google.script.run.withSuccessHandler(function(students) {
+        console.log('openAttendancePrintModal - received students:', students);
+        const select = document.getElementById('printStudentSelect');
+        if (!students || students.length === 0) {
+          select.innerHTML = '<option value="">등록된 실습생이 없습니다</option>';
+        } else {
+          select.innerHTML = '<option value="">-- 실습생 선택 --</option>' + 
+            students.map(s => `<option value="${s.email}" data-name="${s.name}">${s.name} (${s.school || ''} ${s.department || ''})</option>`).join('');
+        }
+        
+        // 기본 날짜 설정
+        const settings = window.appSettings || {};
+        document.getElementById('printStartDate').value = settings.practiceStart || document.getElementById('attendanceStart').value || '';
+        document.getElementById('printEndDate').value = settings.practiceEnd || document.getElementById('attendanceEnd').value || '';
+        
+        openModal('attendancePrintModal');
+      }).withFailureHandler(function(error) {
+        console.error('openAttendancePrintModal error:', error);
+        const select = document.getElementById('printStudentSelect');
+        select.innerHTML = '<option value="">오류가 발생했습니다</option>';
+        openModal('attendancePrintModal');
+      }).getFinalStudents();
+    }
+    
+    function printAttendanceReport() {
+      const select = document.getElementById('printStudentSelect');
+      const email = select.value;
+      const name = select.options[select.selectedIndex]?.dataset?.name || '';
+      const startDate = document.getElementById('printStartDate').value;
+      const endDate = document.getElementById('printEndDate').value;
+      
+      if (!email) {
+        showToast('실습생을 선택해주세요.', 'warning');
+        return;
+      }
+      if (!startDate || !endDate) {
+        showToast('기간을 선택해주세요.', 'warning');
+        return;
+      }
+      
+      showLoading(true);
+      google.script.run.withSuccessHandler(function(result) {
+        showLoading(false);
+        if (result.success) {
+          closeModal('attendancePrintModal');
+          // base64 PDF 다운로드
+          downloadBase64PDF(result.pdfBase64, result.fileName);
+          showToast('출석부가 생성되었습니다.', 'success');
+        } else {
+          showToast(result.message, 'error');
+        }
+      }).withFailureHandler(handleError).generateAttendanceReport(email, name, startDate, endDate);
+    }
+    
+    // base64 PDF 다운로드 헬퍼
+    function downloadBase64PDF(base64, fileName) {
+      const byteCharacters = atob(base64);
+      const byteNumbers = new Array(byteCharacters.length);
+      for (let i = 0; i < byteCharacters.length; i++) {
+        byteNumbers[i] = byteCharacters.charCodeAt(i);
+      }
+      const byteArray = new Uint8Array(byteNumbers);
+      const blob = new Blob([byteArray], { type: 'application/pdf' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = fileName;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    }
+    
+    function loadSubmissions() {
+      google.script.run.withSuccessHandler(function(submissions) {
+        const container = document.getElementById('submissionList');
+        if (!submissions || submissions.length === 0) { container.innerHTML = `<div class="empty-state"><i class="fas fa-inbox"></i><p>제출된 과제가 없습니다.</p></div>`; return; }
+        container.innerHTML = `<div class="table-container"><table class="table"><thead><tr><th>제출일</th><th>실습생</th><th>유형</th><th>제목</th><th>확인</th><th>관리</th></tr></thead><tbody>${submissions.map(s => `<tr><td>${s.submittedAt?.substring(0, 10) || '-'}</td><td><strong>${s.studentName}</strong></td><td><span class="badge badge-info">${s.type}</span></td><td>${s.title}${s.fileId ? ' <i class="fas fa-paperclip" style="color: var(--secondary);"></i>' : ''}</td><td>${s.confirmed ? '<span class="badge badge-success">확인됨</span>' : '<span class="badge badge-warning">대기중</span>'}</td><td><button class="btn btn-outline btn-sm" onclick="viewSubmission('${s.id}')"><i class="fas fa-eye"></i></button>${s.fileId ? `<button class="btn btn-outline btn-sm" onclick="downloadFile('${s.fileId}')"><i class="fas fa-download"></i></button>` : ''}</td></tr>`).join('')}</tbody></table></div>`;
+        window.submissionsData = submissions;
+      }).withFailureHandler(handleError).getAllSubmissions(currentYear);
+    }
+    
+    function viewSubmission(id) {
+      const submission = window.submissionsData?.find(s => s.id === id);
+      if (!submission) return;
+      selectedSubmissionId = id;
+      document.getElementById('submissionDetail').innerHTML = `<div class="detail-grid"><div class="detail-item"><div class="label">실습생</div><div class="value">${submission.studentName}</div></div><div class="detail-item"><div class="label">제출일</div><div class="value">${submission.submittedAt}</div></div><div class="detail-item"><div class="label">유형</div><div class="value">${submission.type}</div></div><div class="detail-item"><div class="label">담당</div><div class="value">${submission.supervisor || '-'}</div></div></div><h4 style="margin: 1.5rem 0 0.5rem;">제목</h4><div style="background: var(--bg); padding: 1rem; border-radius: 8px;">${submission.title}</div><h4 style="margin: 1.5rem 0 0.5rem;">내용</h4><div style="background: var(--bg); padding: 1rem; border-radius: 8px; white-space: pre-wrap;">${submission.content || '(내용 없음)'}</div>${submission.fileId ? `<h4 style="margin: 1.5rem 0 0.5rem;">첨부파일</h4><div class="file-info"><span><i class="fas fa-file"></i> ${submission.fileName}</span><button class="btn btn-outline btn-sm" onclick="downloadFile('${submission.fileId}')"><i class="fas fa-download"></i> 다운로드</button></div>` : ''}${submission.confirmed ? `<h4 style="margin: 1.5rem 0 0.5rem;">피드백</h4><div style="background: #f0fdf4; padding: 1rem; border-radius: 8px;">${submission.feedback || '(피드백 없음)'}</div>` : `<h4 style="margin: 1.5rem 0 0.5rem;">피드백 작성</h4><textarea class="form-textarea" id="submissionFeedback" placeholder="피드백을 입력하세요."></textarea>`}`;
+      document.getElementById('confirmSubmissionBtn').style.display = submission.confirmed ? 'none' : 'inline-flex';
+      openModal('submissionModal');
+    }
+    
+    function confirmSubmission() {
+      if (!selectedSubmissionId) return;
+      const feedback = document.getElementById('submissionFeedback')?.value || '';
+      showLoading(true);
+      google.script.run.withSuccessHandler(function(result) { showLoading(false); if (result.success) { showToast('과제 확인이 완료되었습니다.', 'success'); closeModal('submissionModal'); loadSubmissions(); } }).withFailureHandler(handleError).confirmSubmission(selectedSubmissionId, feedback);
+    }
+    
+    // ==================== 보고서 출력 ====================
+    function loadReportTab() {
+      const select = document.getElementById('reportYear');
+      const thisYear = new Date().getFullYear();
+      let options = '';
+      for (let y = thisYear; y >= thisYear - 5; y--) {
+        options += `<option value="${y}" ${y === currentYear ? 'selected' : ''}>${y}년</option>`;
+      }
+      select.innerHTML = options;
+      loadReportData();
+    }
+    
+    function loadReportData() {
+      const year = document.getElementById('reportYear').value;
+      const container = document.getElementById('reportContent');
+      container.innerHTML = '<p style="color: var(--secondary);"><i class="fas fa-spinner fa-spin"></i> 보고서 데이터 불러오는 중...</p>';
+      
+      google.script.run.withSuccessHandler(function(data) {
+        if (!data) {
+          container.innerHTML = '<div class="alert alert-warning"><i class="fas fa-exclamation-triangle"></i> 데이터를 불러올 수 없습니다.</div>';
+          return;
+        }
+        
+        const today = new Date().toLocaleDateString('ko-KR', { year: 'numeric', month: 'long', day: 'numeric' });
+        
+        let html = `
+          <div id="printableReport" style="padding: 20px; background: white;">
+            <div style="text-align: center; margin-bottom: 30px;">
+              <h1 style="font-size: 1.8em; margin-bottom: 10px;">${year}년 사회복지현장실습생 선발 결과 보고서</h1>
+              <p style="color: #666;">신림종합사회복지관</p>
+              <p style="color: #999; font-size: 0.9em;">작성일: ${today}</p>
+            </div>
+            
+            <h2 style="border-bottom: 2px solid var(--primary); padding-bottom: 8px; margin: 30px 0 15px;"><i class="fas fa-users"></i> 1. 실습생 모집 결과</h2>
+            <p style="margin-bottom: 15px;">총 <strong>${data.finalPass.length}명</strong> 최종 선발</p>
+            <table style="width: 100%; border-collapse: collapse; margin-bottom: 30px;">
+              <thead>
+                <tr style="background: #f5f5f5;">
+                  <th style="border: 1px solid #ddd; padding: 10px; text-align: center;">연번</th>
+                  <th style="border: 1px solid #ddd; padding: 10px; text-align: center;">이름</th>
+                  <th style="border: 1px solid #ddd; padding: 10px; text-align: center;">학교</th>
+                  <th style="border: 1px solid #ddd; padding: 10px; text-align: center;">학과</th>
+                  <th style="border: 1px solid #ddd; padding: 10px; text-align: center;">배정부서</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${data.finalPass.length > 0 ? data.finalPass.map((s, i) => `
+                  <tr>
+                    <td style="border: 1px solid #ddd; padding: 10px; text-align: center;">${i + 1}</td>
+                    <td style="border: 1px solid #ddd; padding: 10px; text-align: center;">${s.name}</td>
+                    <td style="border: 1px solid #ddd; padding: 10px; text-align: center;">${s.school}</td>
+                    <td style="border: 1px solid #ddd; padding: 10px; text-align: center;">${s.department}</td>
+                    <td style="border: 1px solid #ddd; padding: 10px; text-align: center;">${s.assignedDepartment || '-'}</td>
+                  </tr>
+                `).join('') : '<tr><td colspan="5" style="border: 1px solid #ddd; padding: 20px; text-align: center; color: #999;">최종 합격자가 없습니다.</td></tr>'}
+              </tbody>
+            </table>
+            
+            <h2 style="border-bottom: 2px solid var(--primary); padding-bottom: 8px; margin: 30px 0 15px;"><i class="fas fa-clipboard-list"></i> 2. 선발 과정</h2>
+            
+            <h3 style="margin: 20px 0 10px; color: #555;">2-1. 지원 현황</h3>
+            <table style="width: 100%; border-collapse: collapse; margin-bottom: 20px;">
+              <tr style="background: #f9f9f9;">
+                <td style="border: 1px solid #ddd; padding: 10px; width: 30%;">총 지원자</td>
+                <td style="border: 1px solid #ddd; padding: 10px;"><strong>${data.totalApplicants}명</strong></td>
+              </tr>
+              <tr>
+                <td style="border: 1px solid #ddd; padding: 10px;">1차 합격자</td>
+                <td style="border: 1px solid #ddd; padding: 10px;"><strong>${data.firstPass.length}명</strong></td>
+              </tr>
+              <tr style="background: #f9f9f9;">
+                <td style="border: 1px solid #ddd; padding: 10px;">최종 합격자</td>
+                <td style="border: 1px solid #ddd; padding: 10px;"><strong>${data.finalPass.length}명</strong></td>
+              </tr>
+            </table>
+            
+            <h3 style="margin: 20px 0 10px; color: #555;">2-2. 1차 채점 결과 (서류심사)</h3>
+            ${data.firstScoring.length > 0 ? `
+            <table style="width: 100%; border-collapse: collapse; margin-bottom: 20px;">
+              <thead>
+                <tr style="background: #f5f5f5;">
+                  <th style="border: 1px solid #ddd; padding: 8px;">지원자</th>
+                  <th style="border: 1px solid #ddd; padding: 8px;">학교</th>
+                  <th style="border: 1px solid #ddd; padding: 8px;">채점자</th>
+                  <th style="border: 1px solid #ddd; padding: 8px;">동기</th>
+                  <th style="border: 1px solid #ddd; padding: 8px;">자기소개</th>
+                  <th style="border: 1px solid #ddd; padding: 8px;">적합성</th>
+                  <th style="border: 1px solid #ddd; padding: 8px;">성실성</th>
+                  <th style="border: 1px solid #ddd; padding: 8px;">발전가능성</th>
+                  <th style="border: 1px solid #ddd; padding: 8px;">총점</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${data.firstScoring.map(s => `
+                  <tr>
+                    <td style="border: 1px solid #ddd; padding: 8px; text-align: center;">${s.applicantName}</td>
+                    <td style="border: 1px solid #ddd; padding: 8px; text-align: center;">${s.school}</td>
+                    <td style="border: 1px solid #ddd; padding: 8px; text-align: center;">${s.scorerName}</td>
+                    <td style="border: 1px solid #ddd; padding: 8px; text-align: center;">${s.scores[0]}</td>
+                    <td style="border: 1px solid #ddd; padding: 8px; text-align: center;">${s.scores[1]}</td>
+                    <td style="border: 1px solid #ddd; padding: 8px; text-align: center;">${s.scores[2]}</td>
+                    <td style="border: 1px solid #ddd; padding: 8px; text-align: center;">${s.scores[3]}</td>
+                    <td style="border: 1px solid #ddd; padding: 8px; text-align: center;">${s.scores[4]}</td>
+                    <td style="border: 1px solid #ddd; padding: 8px; text-align: center;"><strong>${s.total}</strong></td>
+                  </tr>
+                `).join('')}
+              </tbody>
+            </table>
+            ` : '<p style="color: #999;">1차 채점 기록이 없습니다.</p>'}
+            
+            <h3 style="margin: 20px 0 10px; color: #555;">2-3. 2차 채점 결과 (면접)</h3>
+            ${data.secondScoring.length > 0 ? `
+            <table style="width: 100%; border-collapse: collapse; margin-bottom: 20px;">
+              <thead>
+                <tr style="background: #f5f5f5;">
+                  <th style="border: 1px solid #ddd; padding: 8px;">지원자</th>
+                  <th style="border: 1px solid #ddd; padding: 8px;">학교</th>
+                  <th style="border: 1px solid #ddd; padding: 8px;">채점자</th>
+                  <th style="border: 1px solid #ddd; padding: 8px;">동기</th>
+                  <th style="border: 1px solid #ddd; padding: 8px;">자기소개</th>
+                  <th style="border: 1px solid #ddd; padding: 8px;">적합성</th>
+                  <th style="border: 1px solid #ddd; padding: 8px;">성실성</th>
+                  <th style="border: 1px solid #ddd; padding: 8px;">발전가능성</th>
+                  <th style="border: 1px solid #ddd; padding: 8px;">총점</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${data.secondScoring.map(s => `
+                  <tr>
+                    <td style="border: 1px solid #ddd; padding: 8px; text-align: center;">${s.applicantName}</td>
+                    <td style="border: 1px solid #ddd; padding: 8px; text-align: center;">${s.school}</td>
+                    <td style="border: 1px solid #ddd; padding: 8px; text-align: center;">${s.scorerName}</td>
+                    <td style="border: 1px solid #ddd; padding: 8px; text-align: center;">${s.scores[0]}</td>
+                    <td style="border: 1px solid #ddd; padding: 8px; text-align: center;">${s.scores[1]}</td>
+                    <td style="border: 1px solid #ddd; padding: 8px; text-align: center;">${s.scores[2]}</td>
+                    <td style="border: 1px solid #ddd; padding: 8px; text-align: center;">${s.scores[3]}</td>
+                    <td style="border: 1px solid #ddd; padding: 8px; text-align: center;">${s.scores[4]}</td>
+                    <td style="border: 1px solid #ddd; padding: 8px; text-align: center;"><strong>${s.total}</strong></td>
+                  </tr>
+                `).join('')}
+              </tbody>
+            </table>
+            ` : '<p style="color: #999;">2차 채점 기록이 없습니다.</p>'}
+            
+            <h3 style="margin: 20px 0 10px; color: #555;">2-4. 최종 선발 결과</h3>
+            <table style="width: 100%; border-collapse: collapse; margin-bottom: 30px;">
+              <thead>
+                <tr style="background: #e8f5e9;">
+                  <th style="border: 1px solid #ddd; padding: 10px;">연번</th>
+                  <th style="border: 1px solid #ddd; padding: 10px;">이름</th>
+                  <th style="border: 1px solid #ddd; padding: 10px;">학교</th>
+                  <th style="border: 1px solid #ddd; padding: 10px;">1차 평균</th>
+                  <th style="border: 1px solid #ddd; padding: 10px;">2차 평균</th>
+                  <th style="border: 1px solid #ddd; padding: 10px;">최종 결과</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${data.finalPass.length > 0 ? data.finalPass.map((s, i) => `
+                  <tr>
+                    <td style="border: 1px solid #ddd; padding: 10px; text-align: center;">${i + 1}</td>
+                    <td style="border: 1px solid #ddd; padding: 10px; text-align: center;">${s.name}</td>
+                    <td style="border: 1px solid #ddd; padding: 10px; text-align: center;">${s.school}</td>
+                    <td style="border: 1px solid #ddd; padding: 10px; text-align: center;">${s.firstAvg || '-'}</td>
+                    <td style="border: 1px solid #ddd; padding: 10px; text-align: center;">${s.secondAvg || '-'}</td>
+                    <td style="border: 1px solid #ddd; padding: 10px; text-align: center;"><span style="color: #10b981; font-weight: bold;">최종합격</span></td>
+                  </tr>
+                `).join('') : '<tr><td colspan="6" style="border: 1px solid #ddd; padding: 20px; text-align: center; color: #999;">최종 합격자가 없습니다.</td></tr>'}
+              </tbody>
+            </table>
+            
+            <div style="margin-top: 50px; text-align: center; color: #999; font-size: 0.9em;">
+              <p>- 끝 -</p>
+            </div>
+          </div>
+        `;
+        
+        container.innerHTML = html;
+      }).withFailureHandler(function(error) {
+        container.innerHTML = '<div class="alert alert-warning"><i class="fas fa-exclamation-triangle"></i> 보고서 데이터를 불러올 수 없습니다.</div>';
+      }).getReportData(parseInt(year));
+    }
+    
+    function printReport() {
+      const printContent = document.getElementById('printableReport');
+      if (!printContent) {
+        showToast('보고서 데이터를 먼저 불러와주세요.', 'warning');
+        return;
+      }
+      
+      const printWindow = window.open('', '_blank');
+      printWindow.document.write(`
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <title>실습생 선발 보고서</title>
+          <style>
+            body { font-family: 'Malgun Gothic', sans-serif; margin: 20px; }
+            table { page-break-inside: auto; }
+            tr { page-break-inside: avoid; page-break-after: auto; }
+            @media print {
+              body { margin: 0; padding: 20px; }
+              .no-print { display: none; }
+            }
+          </style>
+        </head>
+        <body>
+          ${printContent.innerHTML}
+        </body>
+        </html>
+      `);
+      printWindow.document.close();
+      printWindow.focus();
+      setTimeout(function() {
+        printWindow.print();
+      }, 500);
+    }
+    
+    function loadSatisfaction() {
+      google.script.run.withSuccessHandler(function(results) {
+        const container = document.getElementById('satisfactionResults');
+        
+        if (results && results.restricted) {
+          container.innerHTML = `
+            <div class="alert alert-warning">
+              <i class="fas fa-lock"></i>
+              <div>
+                <strong>접근 권한 없음</strong><br>
+                ${results.message}
+              </div>
+            </div>
+          `;
+          return;
+        }
+        
+        if (!results || results.length === 0) { 
+          container.innerHTML = `<div class="empty-state"><i class="fas fa-chart-bar"></i><p>제출된 만족도 조사가 없습니다.</p></div>`; 
+          return; 
+        }
+        const questions = ['q1', 'q2', 'q3', 'q4', 'q5', 'q6', 'q7', 'q8', 'q9', 'q10'];
+        const questionLabels = ['실습기관 시설/환경', '자료/정보 제공', '실습 시간/일정', '슈퍼비전 체계성', '의사소통 원활성', '피드백 유용성', '이론-실습 연계', '프로그램 참여 기회', '전문성 향상', '전반적 만족도'];
+        const averages = {};
+        questions.forEach(q => {
+          const scores = results.map(r => parseInt(r.responses[q]) || 0).filter(s => s > 0);
+          averages[q] = scores.length > 0 ? (scores.reduce((a, b) => a + b, 0) / scores.length).toFixed(2) : 0;
+        });
+        const overallAvg = Object.values(averages).reduce((a, b) => parseFloat(a) + parseFloat(b), 0) / questions.length;
+        container.innerHTML = `<div class="stats-grid"><div class="stat-card"><div class="stat-value">${results.length}</div><div class="stat-label">응답 수</div></div><div class="stat-card"><div class="stat-value">${overallAvg.toFixed(2)}</div><div class="stat-label">전체 평균 (5점 만점)</div></div></div><h4 style="margin: 1.5rem 0 1rem;">항목별 평균 점수</h4><div class="table-container"><table class="table"><thead><tr><th>항목</th><th>평균</th><th>시각화</th></tr></thead><tbody>${questions.map((q, i) => `<tr><td>${questionLabels[i]}</td><td><strong>${averages[q]}</strong> / 5</td><td><div style="background: var(--bg); border-radius: 4px; overflow: hidden; height: 20px;"><div style="background: var(--primary); height: 100%; width: ${(averages[q] / 5) * 100}%;"></div></div></td></tr>`).join('')}</tbody></table></div><h4 style="margin: 2rem 0 1rem;">자유 의견</h4>${results.filter(r => r.responses.positive || r.responses.improvement || r.responses.other).map(r => `<div class="card" style="margin-bottom: 1rem;"><small style="color: var(--secondary);">익명 (${r.submittedAt?.substring(0, 10) || '-'})</small>${r.responses.positive ? `<p><strong>좋았던 점:</strong> ${r.responses.positive}</p>` : ''}${r.responses.improvement ? `<p><strong>개선점:</strong> ${r.responses.improvement}</p>` : ''}${r.responses.other ? `<p><strong>기타:</strong> ${r.responses.other}</p>` : ''}</div>`).join('') || '<p style="color: var(--secondary);">자유 의견이 없습니다.</p>'}`;
+      }).withFailureHandler(handleError).getSatisfactionResults(currentYear);
+    }
+    
+    function loadStudents() {
+      google.script.run.withSuccessHandler(function(data) {
+        data = data || [];
+        const container = document.getElementById('studentsList');
+        if (data.length === 0) { 
+          container.innerHTML = `<div class="empty-state"><i class="fas fa-users"></i><p>최종 합격 실습생이 없습니다.</p></div>`; 
+          return; 
+        }
+        container.innerHTML = `
+          <div class="alert alert-warning"><i class="fas fa-exclamation-triangle"></i><div>실습생의 개인정보는 실습 운영 목적으로만 사용해 주세요.</div></div>
+          <div class="table-container">
+            <table class="table">
+              <thead>
+                <tr>
+                  <th>이름</th>
+                  <th>학교</th>
+                  <th>학과</th>
+                  <th>연락처</th>
+                  <th>이메일</th>
+                  <th>배정부서</th>
+                  <th>관리</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${data.map(s => `
+                  <tr>
+                    <td><strong>${s.name}</strong></td>
+                    <td>${s.school}</td>
+                    <td>${s.department}</td>
+                    <td>${s.phone}</td>
+                    <td>${s.email}</td>
+                    <td>${s.assignedDepartment ? `<span class="badge badge-success">${s.assignedDepartment}</span>` : '<span class="badge badge-warning">미배정</span>'}</td>
+                    <td><button class="btn btn-outline btn-sm" onclick="openAssignDeptModal('${s.id}', '${s.name}', '${s.assignedDepartment || ''}')"><i class="fas fa-building"></i> 부서 배정</button></td>
+                  </tr>
+                `).join('')}
+              </tbody>
+            </table>
+          </div>
+        `;
+      }).withFailureHandler(handleError).getStudents(currentYear);
+    }
+    
+    // 슈퍼바이저 관리 함수들
+    function loadSupervisors() {
+      google.script.run.withSuccessHandler(function(data) {
+        data = data || [];
+        const container = document.getElementById('supervisorList');
+        if (data.length === 0) {
+          container.innerHTML = `<div class="empty-state"><i class="fas fa-user-shield"></i><p>등록된 슈퍼바이저가 없습니다.</p></div>`;
+          return;
+        }
+        container.innerHTML = `
+          <div class="table-container">
+            <table class="table">
+              <thead>
+                <tr><th>이름</th><th>부서</th><th>직위</th><th>이메일</th><th>상태</th><th>관리</th></tr>
+              </thead>
+              <tbody>
+                ${data.map(sv => `
+                  <tr>
+                    <td><strong>${sv.name}</strong></td>
+                    <td>${sv.department}</td>
+                    <td>${sv.position}</td>
+                    <td>${sv.email}</td>
+                    <td>${sv.active ? '<span class="badge badge-success">활성</span>' : '<span class="badge badge-danger">비활성</span>'}</td>
+                    <td>
+                      <button class="btn btn-outline btn-sm" onclick="editSupervisor('${sv.id}', '${sv.name}', '${sv.department}', '${sv.position}', '${sv.email}', ${sv.active})"><i class="fas fa-edit"></i></button>
+                      <button class="btn btn-outline btn-sm" style="color: var(--danger);" onclick="deleteSupervisorConfirm('${sv.id}', '${sv.name}')"><i class="fas fa-trash"></i></button>
+                    </td>
+                  </tr>
+                `).join('')}
+              </tbody>
+            </table>
+          </div>
+        `;
+      }).withFailureHandler(handleError).getSupervisors();
+    }
+    
+    function openSupervisorModal() {
+      document.getElementById('supervisorModalTitle').textContent = '슈퍼바이저 추가';
+      document.getElementById('supervisorId').value = '';
+      document.getElementById('supervisorName').value = '';
+      document.getElementById('supervisorDept').value = '';
+      document.getElementById('supervisorPosition').value = '';
+      document.getElementById('supervisorEmail').value = '';
+      document.getElementById('supervisorActive').checked = true;
+      openModal('supervisorModal');
+    }
+    
+    function editSupervisor(id, name, dept, position, email, active) {
+      document.getElementById('supervisorModalTitle').textContent = '슈퍼바이저 수정';
+      document.getElementById('supervisorId').value = id;
+      document.getElementById('supervisorName').value = name;
+      document.getElementById('supervisorDept').value = dept;
+      document.getElementById('supervisorPosition').value = position;
+      document.getElementById('supervisorEmail').value = email;
+      document.getElementById('supervisorActive').checked = active;
+      openModal('supervisorModal');
+    }
+    
+    function saveSupervisor() {
+      const id = document.getElementById('supervisorId').value;
+      const name = document.getElementById('supervisorName').value.trim();
+      const dept = document.getElementById('supervisorDept').value;
+      const position = document.getElementById('supervisorPosition').value.trim();
+      const email = document.getElementById('supervisorEmail').value.trim();
+      const active = document.getElementById('supervisorActive').checked;
+      
+      if (!name || !dept || !position || !email) {
+        showToast('모든 필수 항목을 입력해 주세요.', 'warning');
+        return;
+      }
+      
+      showLoading(true);
+      if (id) {
+        google.script.run.withSuccessHandler(function(result) {
+          showLoading(false);
+          if (result.success) {
+            showToast('슈퍼바이저가 수정되었습니다.', 'success');
+            closeModal('supervisorModal');
+            loadSupervisors();
+          } else {
+            showToast(result.message || '오류가 발생했습니다.', 'error');
+          }
+        }).withFailureHandler(handleError).updateSupervisor(id, name, dept, position, email, active);
+      } else {
+        google.script.run.withSuccessHandler(function(result) {
+          showLoading(false);
+          if (result.success) {
+            showToast('슈퍼바이저가 등록되었습니다.', 'success');
+            closeModal('supervisorModal');
+            loadSupervisors();
+          } else {
+            showToast(result.message || '오류가 발생했습니다.', 'error');
+          }
+        }).withFailureHandler(handleError).addSupervisor(name, dept, position, email);
+      }
+    }
+    
+    function deleteSupervisorConfirm(id, name) {
+      if (!confirm(`'${name}' 슈퍼바이저를 삭제하시겠습니까?`)) return;
+      showLoading(true);
+      google.script.run.withSuccessHandler(function(result) {
+        showLoading(false);
+        if (result.success) {
+          showToast('슈퍼바이저가 삭제되었습니다.', 'success');
+          loadSupervisors();
+        } else {
+          showToast(result.message || '오류가 발생했습니다.', 'error');
+        }
+      }).withFailureHandler(handleError).deleteSupervisor(id);
+    }
+    
+    // 부서 배정 함수들
+    function openAssignDeptModal(studentId, studentName, currentDept) {
+      document.getElementById('assignStudentId').value = studentId;
+      document.getElementById('assignStudentName').textContent = studentName;
+      document.getElementById('assignDept').value = currentDept || '';
+      openModal('assignDeptModal');
+    }
+    
+    function saveAssignDept() {
+      const studentId = document.getElementById('assignStudentId').value;
+      const dept = document.getElementById('assignDept').value;
+      
+      if (!dept) {
+        showToast('부서를 선택해 주세요.', 'warning');
+        return;
+      }
+      
+      showLoading(true);
+      google.script.run.withSuccessHandler(function(result) {
+        showLoading(false);
+        if (result.success) {
+          showToast('부서가 배정되었습니다.', 'success');
+          closeModal('assignDeptModal');
+          loadStudents();
+        } else {
+          showToast(result.message || '오류가 발생했습니다.', 'error');
+        }
+      }).withFailureHandler(handleError).assignDepartment(studentId, dept);
+    }
+    
+    function openModal(id) { document.getElementById(id).classList.add('active'); }
+    function closeModal(id) { document.getElementById(id).classList.remove('active'); }
+    function showLoading(show) { document.getElementById('loading').classList.toggle('active', show); }
+    
+    // HTML 이스케이프 헬퍼 함수
+    function escapeHtml(str) {
+      if (!str) return '';
+      return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+    }
+    function showToast(message, type) {
+      const container = document.getElementById('toastContainer');
+      const toast = document.createElement('div');
+      toast.className = 'toast';
+      let icon = 'info-circle';
+      if (type === 'success') icon = 'check-circle';
+      if (type === 'error') icon = 'exclamation-circle';
+      if (type === 'warning') icon = 'exclamation-triangle';
+      toast.innerHTML = `<i class="fas fa-${icon}"></i> ${message}`;
+      container.appendChild(toast);
+      setTimeout(() => toast.remove(), 4000);
+    }
+    function handleError(error) { showLoading(false); showToast('오류가 발생했습니다: ' + error.message, 'error'); console.error(error); }
+    function getStatusBadge(status) {
+      switch(status) { case '접수완료': return 'badge-info'; case '1차합격': return 'badge-warning'; case '최종합격': return 'badge-success'; case '불합격': return 'badge-danger'; default: return 'badge-info'; }
+    }
+    function downloadFile(fileId) {
+      if (!fileId || fileId === 'undefined' || fileId === 'null') {
+        showToast('파일 정보가 없습니다.', 'warning');
+        return;
+      }
+      showLoading(true);
+      google.script.run.withSuccessHandler(function(result) { showLoading(false); if (result.success) { window.open(result.url, '_blank'); } else { showToast(result.message || '파일을 찾을 수 없습니다.', 'error'); } }).withFailureHandler(handleError).getFileDownloadUrl(fileId);
+    }
+    function submitSupervisorConsent() {
+      if (!document.getElementById('supervisorConsent').checked) { showToast('동의에 체크해 주세요.', 'warning'); return; }
+      showLoading(true);
+      google.script.run.withSuccessHandler(function(result) { showLoading(false); if (result.success) { closeModal('consentModal'); showToast('개인정보보호 취급 동의가 완료되었습니다.', 'success'); loadSettingsTab(); } }).withFailureHandler(handleError).saveSupervisorConsent('');
+    }
+  </script>
+</body>
+</html>

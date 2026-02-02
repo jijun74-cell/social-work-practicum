@@ -1,0 +1,2985 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <base target="_top">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+  <!-- Summernote WYSIWYG 에디터 -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/summernote/0.8.20/summernote-lite.min.css" rel="stylesheet">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/summernote/0.8.20/summernote-lite.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/summernote/0.8.20/lang/summernote-ko-KR.min.js"></script>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    :root {
+      --primary: #2563eb;
+      --primary-dark: #1d4ed8;
+      --secondary: #64748b;
+      --success: #10b981;
+      --warning: #f59e0b;
+      --danger: #ef4444;
+      --bg: #f8fafc;
+      --card: #ffffff;
+      --border: #e2e8f0;
+      --text: #1e293b;
+      --text-muted: #64748b;
+    }
+    
+    body {
+      font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+    }
+    
+    /* Header */
+    .header {
+      background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+      color: white;
+      padding: 1rem;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+    
+    .header-content {
+      max-width: 1200px;
+      margin: 0 auto;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    
+    .logo {
+      font-size: 1.25rem;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    
+    .user-info {
+      font-size: 0.875rem;
+      opacity: 0.9;
+    }
+    
+    /* Navigation */
+    .nav {
+      background: white;
+      border-bottom: 1px solid var(--border);
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+    }
+    
+    .nav-content {
+      max-width: 1200px;
+      margin: 0 auto;
+      display: flex;
+      gap: 0;
+    }
+    
+    .nav-item {
+      padding: 1rem 1.25rem;
+      cursor: pointer;
+      border-bottom: 3px solid transparent;
+      white-space: nowrap;
+      transition: all 0.2s;
+      font-weight: 500;
+      color: var(--secondary);
+    }
+    
+    .nav-item:hover {
+      background: var(--bg);
+      color: var(--primary);
+    }
+    
+    .nav-item.active {
+      border-bottom-color: var(--primary);
+      color: var(--primary);
+    }
+    
+    .nav-item.disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+    
+    /* Main Content */
+    .main {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 1.5rem;
+    }
+    
+    .tab-content {
+      display: none;
+    }
+    
+    .tab-content.active {
+      display: block;
+    }
+    
+    /* Cards */
+    .card {
+      background: var(--card);
+      border-radius: 12px;
+      padding: 1.5rem;
+      margin-bottom: 1.5rem;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+      border: 1px solid var(--border);
+    }
+    
+    .card-title {
+      font-size: 1.25rem;
+      font-weight: 700;
+      margin-bottom: 1rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    
+    /* Form Elements */
+    .form-group {
+      margin-bottom: 1.25rem;
+    }
+    
+    .form-label {
+      display: block;
+      font-weight: 600;
+      margin-bottom: 0.5rem;
+      color: var(--text);
+    }
+    
+    .form-label .required {
+      color: var(--danger);
+    }
+    
+    .form-input, .form-select, .form-textarea {
+      width: 100%;
+      padding: 0.75rem 1rem;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      font-size: 1rem;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+    
+    .form-input:focus, .form-select:focus, .form-textarea:focus {
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+    }
+    
+    .form-textarea {
+      min-height: 120px;
+      resize: vertical;
+    }
+    
+    .form-row {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1rem;
+    }
+    
+    /* Buttons */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.75rem 1.5rem;
+      border: none;
+      border-radius: 8px;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    
+    .btn-primary {
+      background: var(--primary);
+      color: white;
+    }
+    
+    .btn-primary:hover {
+      background: var(--primary-dark);
+    }
+    
+    .btn-secondary {
+      background: var(--secondary);
+      color: white;
+    }
+    
+    .btn-success {
+      background: var(--success);
+      color: white;
+    }
+    
+    .btn-info {
+      background: #17a2b8;
+      color: white;
+    }
+    
+    .btn-info:hover {
+      background: #138496;
+    }
+    
+    .btn-danger {
+      background: var(--danger);
+      color: white;
+    }
+    
+    .btn-outline {
+      background: transparent;
+      border: 2px solid var(--primary);
+      color: var(--primary);
+    }
+    
+    .btn-outline:hover {
+      background: var(--primary);
+      color: white;
+    }
+    
+    .btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+    
+    /* Status Badge */
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      padding: 0.25rem 0.75rem;
+      border-radius: 20px;
+      font-size: 0.75rem;
+      font-weight: 600;
+    }
+    
+    .badge-success {
+      background: #dcfce7;
+      color: #166534;
+    }
+    
+    .badge-warning {
+      background: #fef3c7;
+      color: #92400e;
+    }
+    
+    .badge-danger {
+      background: #fee2e2;
+      color: #991b1b;
+    }
+    
+    .badge-info {
+      background: #dbeafe;
+      color: #1e40af;
+    }
+    
+    /* Table */
+    .table-container {
+      overflow-x: auto;
+    }
+    
+    .table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+    
+    .table th, .table td {
+      padding: 0.875rem 1rem;
+      text-align: left;
+      border-bottom: 1px solid var(--border);
+    }
+    
+    .table th {
+      background: var(--bg);
+      font-weight: 600;
+      color: var(--secondary);
+      font-size: 0.875rem;
+    }
+    
+    .table tr:hover {
+      background: var(--bg);
+    }
+    
+    /* Pagination */
+    .pagination {
+      display: flex;
+      justify-content: center;
+      gap: 0.5rem;
+      margin-top: 1.5rem;
+    }
+    
+    .page-btn {
+      padding: 0.5rem 1rem;
+      border: 1px solid var(--border);
+      background: white;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    
+    .page-btn:hover, .page-btn.active {
+      background: var(--primary);
+      color: white;
+      border-color: var(--primary);
+    }
+    
+    /* Modal */
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0,0,0,0.5);
+      z-index: 1000;
+      align-items: center;
+      justify-content: center;
+    }
+    
+    .modal-overlay.active {
+      display: flex;
+    }
+    
+    .modal {
+      background: white;
+      border-radius: 16px;
+      width: 90%;
+      max-width: 600px;
+      max-height: 90vh;
+      overflow-y: auto;
+    }
+    
+    .modal-header {
+      padding: 1.25rem 1.5rem;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    
+    .modal-title {
+      font-size: 1.25rem;
+      font-weight: 700;
+    }
+    
+    .modal-close {
+      background: none;
+      border: none;
+      font-size: 1.5rem;
+      cursor: pointer;
+      color: var(--secondary);
+    }
+    
+    .modal-body {
+      padding: 1.5rem;
+    }
+    
+    .modal-footer {
+      padding: 1rem 1.5rem;
+      border-top: 1px solid var(--border);
+      display: flex;
+      justify-content: flex-end;
+      gap: 0.75rem;
+    }
+    
+    /* Alert */
+    .alert {
+      padding: 1rem 1.25rem;
+      border-radius: 8px;
+      margin-bottom: 1rem;
+      display: flex;
+      align-items: flex-start;
+      gap: 0.75rem;
+    }
+    
+    .alert-info {
+      background: #eff6ff;
+      color: #1e40af;
+      border: 1px solid #bfdbfe;
+    }
+    
+    .alert-success {
+      background: #f0fdf4;
+      color: #166534;
+      border: 1px solid #bbf7d0;
+    }
+    
+    .alert-warning {
+      background: #fffbeb;
+      color: #92400e;
+      border: 1px solid #fde68a;
+    }
+    
+    .alert-danger {
+      background: #fef2f2;
+      color: #991b1b;
+      border: 1px solid #fecaca;
+    }
+    
+    /* Attendance Card */
+    .attendance-card {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 2rem;
+      text-align: center;
+    }
+    
+    .attendance-time {
+      font-size: 3rem;
+      font-weight: 700;
+      margin: 1rem 0;
+    }
+    
+    .attendance-date {
+      color: var(--secondary);
+      margin-bottom: 1.5rem;
+    }
+    
+    .attendance-buttons {
+      display: flex;
+      gap: 1rem;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+    
+    .attendance-btn {
+      padding: 1rem 2.5rem;
+      font-size: 1.125rem;
+    }
+    
+    /* Result Cards (합격자 공지) */
+    .result-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 1rem;
+    }
+    
+    .result-card {
+      background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+      color: white;
+      padding: 1.5rem;
+      border-radius: 12px;
+      text-align: center;
+    }
+    
+    .result-card .name {
+      font-size: 1.25rem;
+      font-weight: 700;
+    }
+    
+    .result-card .stage {
+      font-size: 0.875rem;
+      opacity: 0.9;
+      margin-top: 0.5rem;
+    }
+    
+    /* File Upload */
+    .file-upload {
+      border: 2px dashed var(--border);
+      border-radius: 12px;
+      padding: 2rem;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    
+    .file-upload:hover {
+      border-color: var(--primary);
+      background: var(--bg);
+    }
+    
+    .file-upload input {
+      display: none;
+    }
+    
+    .file-upload i {
+      font-size: 2.5rem;
+      color: var(--secondary);
+      margin-bottom: 1rem;
+    }
+    
+    .file-info {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0.75rem 1rem;
+      background: var(--bg);
+      border-radius: 8px;
+      margin-top: 1rem;
+    }
+    
+    /* Loading */
+    .loading {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(255,255,255,0.8);
+      z-index: 2000;
+      align-items: center;
+      justify-content: center;
+    }
+    
+    .loading.active {
+      display: flex;
+    }
+    
+    .spinner {
+      width: 50px;
+      height: 50px;
+      border: 4px solid var(--border);
+      border-top-color: var(--primary);
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+    
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+    
+    /* Consent Box */
+    .consent-box {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 1.25rem;
+      max-height: 300px;
+      overflow-y: auto;
+      margin-bottom: 1rem;
+      font-size: 0.875rem;
+      line-height: 1.8;
+    }
+    
+    .consent-checkbox {
+      display: flex;
+      align-items: flex-start;
+      gap: 0.75rem;
+      margin-top: 1rem;
+    }
+    
+    .consent-checkbox input {
+      margin-top: 0.25rem;
+      width: 18px;
+      height: 18px;
+    }
+    
+    /* Empty State */
+    .empty-state {
+      text-align: center;
+      padding: 3rem 1rem;
+      color: var(--secondary);
+    }
+    
+    .empty-state i {
+      font-size: 3rem;
+      margin-bottom: 1rem;
+      opacity: 0.5;
+    }
+    
+    /* Toast */
+    .toast-container {
+      position: fixed;
+      bottom: 1.5rem;
+      right: 1.5rem;
+      z-index: 3000;
+    }
+    
+    .toast {
+      background: #1e293b;
+      color: white;
+      padding: 1rem 1.5rem;
+      border-radius: 8px;
+      margin-top: 0.5rem;
+      animation: slideIn 0.3s ease;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    }
+    
+    @keyframes slideIn {
+      from {
+        transform: translateX(100%);
+        opacity: 0;
+      }
+      to {
+        transform: translateX(0);
+        opacity: 1;
+      }
+    }
+    
+    /* Responsive */
+    /* 테이블 편집 - 선택된 셀 */
+    .note-editable td.selected-cell,
+    .note-editable th.selected-cell {
+      background-color: #b3d9ff !important;
+      outline: 2px solid #2563eb;
+    }
+    
+    /* 테이블 편집 버튼 스타일 */
+    .note-btn-group .note-btn {
+      font-size: 0.75rem;
+    }
+    
+    @media (max-width: 768px) {
+      .nav-content {
+        padding: 0 0.5rem;
+      }
+      
+      .nav-item {
+        padding: 0.875rem 1rem;
+        font-size: 0.875rem;
+      }
+      
+      .main {
+        padding: 1rem;
+      }
+      
+      .form-row {
+        grid-template-columns: 1fr;
+      }
+      
+      .attendance-time {
+        font-size: 2.5rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- Loading -->
+  <div class="loading" id="loading">
+    <div class="spinner"></div>
+  </div>
+  
+  <!-- Toast Container -->
+  <div class="toast-container" id="toastContainer"></div>
+  
+  <!-- 로그인 모달 -->
+  <div class="modal-overlay" id="loginModal" style="display: none;">
+    <div class="modal" style="max-width: 400px;">
+      <div class="modal-header" style="background: linear-gradient(135deg, #2563eb, #1d4ed8); color: white;">
+        <h3 class="modal-title"><i class="fas fa-user-check"></i> 최종합격자 로그인</h3>
+        <button class="modal-close" onclick="closeModal('loginModal')" style="color: white;">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div style="margin-bottom: 20px;">
+          <label class="form-label">이메일</label>
+          <input type="email" id="loginEmail" class="form-input" placeholder="신청서에 입력한 이메일">
+        </div>
+        
+        <div style="margin-bottom: 20px;">
+          <label class="form-label">비밀번호</label>
+          <input type="password" id="loginPassword" class="form-input" placeholder="휴대폰 뒷자리 4자리" maxlength="4"
+            onkeypress="if(event.key==='Enter') doLogin();">
+        </div>
+        
+        <div id="loginError" style="margin-bottom: 15px; padding: 12px; background: #fef2f2; border: 1px solid #fecaca; border-radius: 8px; color: #dc2626; font-size: 0.9rem; display: none;">
+        </div>
+        
+        <div style="background: #f0f9ff; border: 1px solid #bae6fd; border-radius: 8px; padding: 12px; font-size: 0.85rem; color: #0369a1;">
+          <p style="margin-bottom: 8px;"><strong><i class="fas fa-info-circle"></i> 로그인 안내</strong></p>
+          <ul style="margin: 0; padding-left: 20px;">
+            <li>아이디: 실습 신청서에 입력한 이메일</li>
+            <li>비밀번호: 휴대폰 번호 뒷자리 4자리</li>
+          </ul>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-outline" onclick="closeModal('loginModal')">취소</button>
+        <button class="btn btn-primary" onclick="doLogin()"><i class="fas fa-sign-in-alt"></i> 로그인</button>
+      </div>
+    </div>
+  </div>
+  
+  <!-- 메인 앱 -->
+  <div id="mainApp">
+    <!-- Header -->
+    <header class="header">
+      <div class="header-content">
+        <div class="logo">
+          <i class="fas fa-graduation-cap"></i>
+          <span>사회복지현장실습</span>
+        </div>
+        <div class="user-info" id="userInfo">
+          <!-- 로그인 전: 로그인 버튼 표시 -->
+          <span id="guestInfo">
+            <button id="loginBtn" onclick="openModal('loginModal')" style="background: rgba(255,255,255,0.2); border: 1px solid rgba(255,255,255,0.5); color: white; padding: 8px 16px; border-radius: 8px; cursor: pointer; font-size: 0.9rem; display: none;">
+              <i class="fas fa-sign-in-alt"></i> 합격자 로그인
+            </button>
+          </span>
+          <!-- 로그인 후: 사용자 정보 표시 -->
+          <span id="loggedInInfo" style="display: none;">
+            <span id="userNameDisplay"></span>
+            <button onclick="doLogout()" style="margin-left: 10px; background: rgba(255,255,255,0.2); border: none; color: white; padding: 5px 10px; border-radius: 5px; cursor: pointer; font-size: 0.8rem;">
+              <i class="fas fa-sign-out-alt"></i> 로그아웃
+            </button>
+          </span>
+        </div>
+      </div>
+    </header>
+  
+  <!-- Navigation -->
+  <nav class="nav">
+    <div class="nav-content">
+      <div class="nav-item active" data-tab="application" id="navApplication">
+        <i class="fas fa-file-alt"></i> 신청
+      </div>
+      <div class="nav-item" data-tab="results" id="navResults">
+        <i class="fas fa-trophy"></i> 합격자 공지
+      </div>
+      <div class="nav-item" data-tab="finalInfo" id="navFinalInfo">
+        <i class="fas fa-user-check"></i> 최종합격자 입력
+      </div>
+      <div class="nav-item" data-tab="notice" id="navNotice">
+        <i class="fas fa-bullhorn"></i> 실습안내
+      </div>
+      <div class="nav-item" data-tab="attendance" id="navAttendance">
+        <i class="fas fa-clock"></i> 출석부
+      </div>
+      <div class="nav-item" data-tab="forms" id="navForms">
+        <i class="fas fa-folder-open"></i> 실습서식
+      </div>
+      <div class="nav-item" data-tab="submission" id="navSubmission">
+        <i class="fas fa-upload"></i> 과제제출
+      </div>
+      <div class="nav-item" data-tab="satisfaction" id="navSatisfaction">
+        <i class="fas fa-smile"></i> 만족도조사
+      </div>
+    </div>
+  </nav>
+  
+  <!-- Main Content -->
+  <main class="main">
+    <!-- 신청 탭 -->
+    <div class="tab-content active" id="tabApplication">
+      <div id="applicationStatus"></div>
+      <div id="applicationForm"></div>
+    </div>
+    
+    <!-- 합격자 공지 탭 -->
+    <div class="tab-content" id="tabResults">
+      <div class="card">
+        <h2 class="card-title"><i class="fas fa-trophy"></i> 합격자 발표</h2>
+        <div id="resultsContent"></div>
+      </div>
+    </div>
+    
+    <!-- 최종합격자 정보입력 탭 -->
+    <div class="tab-content" id="tabFinalInfo">
+      <div class="card">
+        <h2 class="card-title"><i class="fas fa-user-check"></i> 최종합격자 정보 입력</h2>
+        <div id="finalInfoContent"></div>
+      </div>
+    </div>
+    
+    <!-- 실습안내 탭 -->
+    <div class="tab-content" id="tabNotice">
+      <div class="card">
+        <h2 class="card-title"><i class="fas fa-bullhorn"></i> 공지사항</h2>
+        <div id="noticeList"></div>
+        <div class="pagination" id="noticePagination"></div>
+      </div>
+      
+      <div class="card">
+        <h2 class="card-title"><i class="fas fa-file-pdf"></i> 실습계획서</h2>
+        <div id="practicePlan"></div>
+      </div>
+    </div>
+    
+    <!-- 출석부 탭 -->
+    <div class="tab-content" id="tabAttendance">
+      <div class="card attendance-card">
+        <h2 class="card-title"><i class="fas fa-clock"></i> 출퇴근 체크</h2>
+        <div class="attendance-date" id="currentDate"></div>
+        <div class="attendance-time" id="currentTime">--:--:--</div>
+        <div id="locationInfo" style="color: var(--secondary); margin-bottom: 1rem;"></div>
+        <div class="attendance-buttons">
+          <button class="btn btn-success attendance-btn" onclick="recordAttendance('checkin')">
+            <i class="fas fa-sign-in-alt"></i> 출근
+          </button>
+          <button class="btn btn-danger attendance-btn" onclick="recordAttendance('checkout')">
+            <i class="fas fa-sign-out-alt"></i> 퇴근
+          </button>
+        </div>
+      </div>
+      
+      <div class="card">
+        <h2 class="card-title">
+          <span><i class="fas fa-calendar-alt"></i> 출석 기록</span>
+          <button class="btn btn-outline btn-sm" onclick="openMyAttendancePrintModal()" style="margin-left: auto;"><i class="fas fa-print"></i> 출석부 출력</button>
+        </h2>
+        <div class="form-row" style="margin-bottom: 1rem; align-items: flex-end;">
+          <div class="form-group" style="margin-bottom: 0; flex: 1;">
+            <label class="form-label">시작일</label>
+            <input type="date" class="form-input" id="myAttendanceStart">
+          </div>
+          <div class="form-group" style="margin-bottom: 0; flex: 1;">
+            <label class="form-label">종료일</label>
+            <input type="date" class="form-input" id="myAttendanceEnd">
+          </div>
+          <button class="btn btn-primary btn-sm" onclick="loadMyAttendanceList()"><i class="fas fa-search"></i></button>
+        </div>
+        <div id="attendanceList"></div>
+      </div>
+    </div>
+    
+    <!-- 실습서식 탭 -->
+    <div class="tab-content" id="tabForms">
+      <div class="card">
+        <h2 class="card-title"><i class="fas fa-folder-open"></i> 실습서식 다운로드</h2>
+        <div id="formsList"></div>
+      </div>
+    </div>
+    
+    <!-- 과제제출 탭 -->
+    <div class="tab-content" id="tabSubmission">
+      <div class="card">
+        <h2 class="card-title"><i class="fas fa-upload"></i> 과제 제출</h2>
+        <div id="submissionForm"></div>
+      </div>
+      
+      <div class="card">
+        <h2 class="card-title"><i class="fas fa-list"></i> 제출 목록</h2>
+        <div id="submissionList"></div>
+      </div>
+    </div>
+    
+    <!-- 만족도조사 탭 -->
+    <div class="tab-content" id="tabSatisfaction">
+      <div class="card">
+        <h2 class="card-title"><i class="fas fa-smile"></i> 실습 만족도 조사</h2>
+        <div class="alert alert-info">
+          <i class="fas fa-lock"></i>
+          <div>
+            <strong>비밀보장 안내</strong><br>
+            본 만족도 조사는 익명으로 처리되며, 응답 내용은 실습 프로그램 개선을 위해서만 활용됩니다.
+            개인을 식별할 수 있는 정보는 수집되지 않습니다.
+          </div>
+        </div>
+        <div id="satisfactionForm"></div>
+      </div>
+    </div>
+  </main>
+  
+  <!-- 내 출석부 출력 모달 -->
+  <div class="modal-overlay" id="myAttendancePrintModal">
+    <div class="modal" style="max-width: 450px;">
+      <div class="modal-header">
+        <h3 class="modal-title">출석부 출력</h3>
+        <button class="modal-close" onclick="closeModal('myAttendancePrintModal')">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">시작일</label>
+            <input type="date" class="form-input" id="myPrintStartDate">
+          </div>
+          <div class="form-group">
+            <label class="form-label">종료일</label>
+            <input type="date" class="form-input" id="myPrintEndDate">
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-outline" onclick="closeModal('myAttendancePrintModal')">취소</button>
+        <button class="btn btn-primary" onclick="printMyAttendanceReport()"><i class="fas fa-file-pdf"></i> PDF 다운로드</button>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Feedback Modal -->
+  <div class="modal-overlay" id="feedbackModal">
+    <div class="modal">
+      <div class="modal-header">
+        <h3 class="modal-title"><i class="fas fa-comment"></i> 슈퍼바이저 피드백</h3>
+        <button class="modal-close" onclick="closeModal('feedbackModal')">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div id="feedbackContent"></div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-primary" onclick="closeModal('feedbackModal')">확인</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Privacy Consent Modal -->
+  <div class="modal-overlay" id="privacyModal">
+    <div class="modal">
+      <div class="modal-header">
+        <h3 class="modal-title">개인정보 수집·이용 동의</h3>
+        <button class="modal-close" onclick="closeModal('privacyModal')">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="consent-box">
+          <h4>개인정보 수집·이용 동의서</h4><br>
+          <p>본 기관은 사회복지현장실습 운영을 위해 아래와 같이 개인정보를 수집·이용하고자 합니다.</p><br>
+          
+          <strong>1. 수집 목적</strong>
+          <p>사회복지현장실습 신청자 선발 및 실습 운영</p><br>
+          
+          <strong>2. 수집 항목</strong>
+          <p>성명, 생년월일, 성별, 연락처, 이메일, 주소, 학교/학과 정보, 지도교수 정보</p><br>
+          
+          <strong>3. 보유 기간</strong>
+          <p>실습 종료 후 5년간 보관 후 파기</p><br>
+          
+          <strong>4. 동의 거부 권리</strong>
+          <p>귀하는 개인정보 수집·이용에 대한 동의를 거부할 권리가 있습니다. 다만, 동의를 거부할 경우 실습 신청이 제한됩니다.</p><br>
+          
+          <strong>5. 제3자 제공</strong>
+          <p>최종 합격 시 실습보험 가입을 위해 보험사에 성명, 주민등록번호가 제공될 수 있습니다.</p>
+        </div>
+        <div class="consent-checkbox">
+          <input type="checkbox" id="privacyAgree">
+          <label for="privacyAgree">위 내용을 확인하였으며, 개인정보 수집·이용에 동의합니다.</label>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" onclick="closeModal('privacyModal')">취소</button>
+        <button class="btn btn-primary" id="privacyAgreeBtn" onclick="submitPrivacyConsent()">동의</button>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Table Size Modal -->
+  <div class="modal-overlay" id="tableSizeModal">
+    <div class="modal" style="max-width: 350px;">
+      <div class="modal-header">
+        <h3 class="modal-title"><i class="fas fa-table"></i> 표 삽입</h3>
+        <button class="modal-close" onclick="closeModal('tableSizeModal')">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label class="form-label">행 수</label>
+          <input type="number" class="form-input" id="tableRows" value="3" min="1" max="20">
+        </div>
+        <div class="form-group">
+          <label class="form-label">열 수</label>
+          <input type="number" class="form-input" id="tableCols" value="3" min="1" max="10">
+        </div>
+        <div style="margin-top: 15px; padding: 10px; background: #f5f5f5; border-radius: 8px;">
+          <strong>빠른 선택:</strong>
+          <div style="display: flex; gap: 8px; margin-top: 8px; flex-wrap: wrap;">
+            <button type="button" class="btn btn-outline" style="padding: 5px 10px; font-size: 0.85rem;" onclick="insertTableAtCursor(2, 2); closeModal('tableSizeModal');">2×2</button>
+            <button type="button" class="btn btn-outline" style="padding: 5px 10px; font-size: 0.85rem;" onclick="insertTableAtCursor(3, 3); closeModal('tableSizeModal');">3×3</button>
+            <button type="button" class="btn btn-outline" style="padding: 5px 10px; font-size: 0.85rem;" onclick="insertTableAtCursor(4, 4); closeModal('tableSizeModal');">4×4</button>
+            <button type="button" class="btn btn-outline" style="padding: 5px 10px; font-size: 0.85rem;" onclick="insertTableAtCursor(5, 2); closeModal('tableSizeModal');">5×2</button>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" onclick="closeModal('tableSizeModal')">취소</button>
+        <button class="btn btn-primary" onclick="insertCustomTable()">삽입</button>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Notice Detail Modal -->
+  <div class="modal-overlay" id="noticeModal">
+    <div class="modal">
+      <div class="modal-header">
+        <h3 class="modal-title" id="noticeModalTitle">공지사항</h3>
+        <button class="modal-close" onclick="closeModal('noticeModal')">&times;</button>
+      </div>
+      <div class="modal-body" id="noticeModalBody"></div>
+    </div>
+  </div>
+  
+  </div><!-- mainApp 끝 -->
+  
+  <script>
+    // 전역 변수
+    let appStatus = null;
+    let currentLocation = null;
+    let noticePage = 1;
+    let locationRequested = false;  // 위치 요청 여부
+    let loggedInEmail = null;  // 로그인된 이메일
+    let loggedInName = null;   // 로그인된 사용자 이름
+    
+    // ==================== 로그인 관련 ====================
+    function checkLoginStatus() {
+      // sessionStorage에서 로그인 정보 확인
+      loggedInEmail = sessionStorage.getItem('studentEmail');
+      loggedInName = sessionStorage.getItem('studentName');
+      
+      // 앱 초기화 (로그인 여부와 상관없이 항상 실행)
+      initApp();
+    }
+    
+    function updateLoginButton() {
+      // 로그인 기간이고, 아직 로그인하지 않은 경우에만 로그인 버튼 표시
+      const isLoginPeriod = appStatus && appStatus.isLoginPeriod;
+      const loginBtn = document.getElementById('loginBtn');
+      const guestInfo = document.getElementById('guestInfo');
+      const loggedInInfo = document.getElementById('loggedInInfo');
+      
+      if (loggedInEmail) {
+        // 로그인 된 상태
+        guestInfo.style.display = 'none';
+        loggedInInfo.style.display = 'inline';
+        document.getElementById('userNameDisplay').textContent = loggedInName + ' (' + loggedInEmail + ')';
+      } else {
+        // 로그인 안 된 상태
+        loggedInInfo.style.display = 'none';
+        guestInfo.style.display = 'inline';
+        
+        if (isLoginPeriod) {
+          loginBtn.style.display = 'inline-block';
+        } else {
+          loginBtn.style.display = 'none';
+        }
+      }
+    }
+    
+    function doLogin() {
+      const email = document.getElementById('loginEmail').value.trim();
+      const password = document.getElementById('loginPassword').value.trim();
+      const errorDiv = document.getElementById('loginError');
+      
+      if (!email || !password) {
+        errorDiv.textContent = '이메일과 비밀번호를 입력해주세요.';
+        errorDiv.style.display = 'block';
+        return;
+      }
+      
+      errorDiv.style.display = 'none';
+      showLoading(true);
+      
+      google.script.run
+        .withSuccessHandler(function(result) {
+          showLoading(false);
+          if (result.success) {
+            // 최종합격자만 로그인 가능
+            if (result.status !== '최종합격') {
+              errorDiv.textContent = '최종합격자만 로그인할 수 있습니다.';
+              errorDiv.style.display = 'block';
+              return;
+            }
+            
+            // 로그인 성공 - 세션 저장
+            sessionStorage.setItem('studentEmail', result.email);
+            sessionStorage.setItem('studentName', result.name);
+            sessionStorage.setItem('studentStatus', result.status);
+            loggedInEmail = result.email;
+            loggedInName = result.name;
+            
+            // 모달 닫고 앱 갱신
+            closeModal('loginModal');
+            showToast('로그인되었습니다. 환영합니다, ' + result.name + '님!', 'success');
+            
+            // 앱 상태 다시 조회하여 탭 갱신
+            refreshAppForLoggedInUser();
+          } else {
+            errorDiv.textContent = result.message;
+            errorDiv.style.display = 'block';
+          }
+        })
+        .withFailureHandler(function(error) {
+          showLoading(false);
+          errorDiv.textContent = '로그인 중 오류가 발생했습니다.';
+          errorDiv.style.display = 'block';
+        })
+        .loginStudent(email, password);
+    }
+    
+    function refreshAppForLoggedInUser() {
+      showLoading(true);
+      google.script.run
+        .withSuccessHandler(function(status) {
+          appStatus = status;
+          updateLoginButton();
+          updateNavigation();
+          showLoading(false);
+        })
+        .withFailureHandler(handleError)
+        .getAppStatusForStudent(loggedInEmail);
+    }
+    
+    function doLogout() {
+      sessionStorage.removeItem('studentEmail');
+      sessionStorage.removeItem('studentName');
+      sessionStorage.removeItem('studentStatus');
+      loggedInEmail = null;
+      loggedInName = null;
+      
+      // 앱 상태 갱신
+      showToast('로그아웃되었습니다.', 'info');
+      initApp();
+    }
+    
+    // 초기화
+    document.addEventListener('DOMContentLoaded', function() {
+      checkLoginStatus();
+      setupNavigation();
+      updateClock();
+      setInterval(updateClock, 1000);
+      // 위치조회는 출석탭에서 합격자에 한해서만 요청
+    });
+    
+    function initApp() {
+      showLoading(true);
+      
+      // 로그인된 이메일이 있으면 해당 이메일로 상태 조회
+      if (loggedInEmail) {
+        google.script.run
+          .withSuccessHandler(function(status) {
+            appStatus = status;
+            console.log('AppStatus (logged in) loaded:', JSON.stringify(status, null, 2));
+            updateLoginButton();
+            updateNavigation();
+            loadApplicationTab();
+            showLoading(false);
+          })
+          .withFailureHandler(handleError)
+          .getAppStatusForStudent(loggedInEmail);
+      } else {
+        // 로그인 안 되어 있으면 기본 상태
+        google.script.run
+          .withSuccessHandler(function(status) {
+            appStatus = status;
+            console.log('AppStatus (guest) loaded:', JSON.stringify(status, null, 2));
+            updateLoginButton();
+            updateNavigation();
+            loadApplicationTab();
+            showLoading(false);
+          })
+          .withFailureHandler(handleError)
+          .getAppStatus();
+      }
+    }
+    
+    function setupNavigation() {
+      document.querySelectorAll('.nav-item').forEach(item => {
+        item.addEventListener('click', function() {
+          if (this.classList.contains('disabled')) {
+            showToast('현재 이용할 수 없는 메뉴입니다.', 'warning');
+            return;
+          }
+          
+          document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
+          document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+          
+          this.classList.add('active');
+          const tabId = 'tab' + this.dataset.tab.charAt(0).toUpperCase() + this.dataset.tab.slice(1);
+          document.getElementById(tabId).classList.add('active');
+          
+          loadTabContent(this.dataset.tab);
+        });
+      });
+    }
+    
+    function updateNavigation() {
+      const isTestMode = appStatus.isTestMode || false;
+      const userStatus = appStatus.userApplicationStatus || null;
+      const isFinalPass = userStatus === '최종합격';
+      const satisfactionActive = appStatus.settings && appStatus.settings.satisfactionActive;
+      
+      // 테스트 계정은 모든 탭 접근 가능
+      if (isTestMode) {
+        document.querySelectorAll('.nav-item').forEach(function(nav) {
+          nav.classList.remove('disabled');
+          nav.style.display = 'flex';
+        });
+        return;
+      }
+      
+      // 기본: 모든 탭 숨김
+      const allNavs = ['navApplication', 'navResults', 'navFinalInfo', 'navNotice', 'navAttendance', 'navForms', 'navSubmission', 'navSatisfaction'];
+      allNavs.forEach(function(id) {
+        var nav = document.getElementById(id);
+        if (nav) {
+          nav.style.display = 'none';
+          nav.classList.remove('disabled');
+        }
+      });
+      
+      // 1. 모든 사용자: 신청, 합격자 공지 항상 표시
+      document.getElementById('navApplication').style.display = 'flex';
+      document.getElementById('navResults').style.display = 'flex';
+      
+      // 2. 로그인한 최종합격자만 볼 수 있는 탭
+      if (loggedInEmail && isFinalPass) {
+        document.getElementById('navFinalInfo').style.display = 'flex';
+        document.getElementById('navNotice').style.display = 'flex';
+        document.getElementById('navAttendance').style.display = 'flex';
+        document.getElementById('navForms').style.display = 'flex';
+        document.getElementById('navSubmission').style.display = 'flex';
+        
+        // 만족도조사는 활성화되었을 때만
+        if (satisfactionActive) {
+          document.getElementById('navSatisfaction').style.display = 'flex';
+        }
+      }
+    }
+    
+    function loadTabContent(tab) {
+      switch(tab) {
+        case 'application':
+          loadApplicationTab();
+          break;
+        case 'results':
+          loadResultsTab();
+          break;
+        case 'finalInfo':
+          loadFinalInfoTab();
+          break;
+        case 'notice':
+          loadNoticeTab();
+          break;
+        case 'attendance':
+          loadAttendanceTab();
+          break;
+        case 'forms':
+          loadFormsTab();
+          break;
+        case 'submission':
+          loadSubmissionTab();
+          break;
+        case 'satisfaction':
+          loadSatisfactionTab();
+          break;
+      }
+    }
+    
+    // ==================== 신청 탭 ====================
+    function loadApplicationTab() {
+      google.script.run
+        .withSuccessHandler(function(status) {
+          const container = document.getElementById('applicationStatus');
+          const formContainer = document.getElementById('applicationForm');
+          
+          if (status) {
+            var firstPassHtml = '';
+            var secondPassHtml = '';
+            if (status.firstPass) {
+              firstPassHtml = '<br>1차: <span class="badge ' + (status.firstPass === '합격' ? 'badge-success' : 'badge-danger') + '">' + status.firstPass + '</span>';
+            }
+            if (status.secondPass) {
+              secondPassHtml = '<br>최종: <span class="badge ' + (status.secondPass === '합격' ? 'badge-success' : 'badge-danger') + '">' + status.secondPass + '</span>';
+            }
+            container.innerHTML = '<div class="card"><h2 class="card-title"><i class="fas fa-info-circle"></i> 신청 현황</h2><div class="alert alert-info"><i class="fas fa-user"></i><div><strong>' + status.name + '님의 신청 상태</strong><br>신청일: ' + status.appliedDate + '<br>상태: <span class="badge ' + getStatusBadge(status.status) + '">' + status.status + '</span>' + firstPassHtml + secondPassHtml + '</div></div></div>';
+            formContainer.innerHTML = '';
+          } else if (appStatus.isRecruitmentPeriod) {
+            var recruitStart = (appStatus.settings && appStatus.settings.recruitStart) || '';
+            var recruitEnd = (appStatus.settings && appStatus.settings.recruitEnd) || '';
+            container.innerHTML = '<div class="alert alert-success"><i class="fas fa-calendar-check"></i><div><strong>신청 기간입니다!</strong><br>' + recruitStart + ' ~ ' + recruitEnd + '</div></div>';
+            formContainer.innerHTML = renderApplicationForm();
+          } else {
+            container.innerHTML = '<div class="alert alert-warning"><i class="fas fa-calendar-times"></i><div><strong>현재 신청 기간이 아닙니다.</strong><br>신청 기간을 확인해 주세요.</div></div>';
+            formContainer.innerHTML = '';
+          }
+        })
+        .withFailureHandler(handleError)
+        .getMyApplicationStatus();
+    }
+    
+    
+    function renderApplicationForm() {
+      var html = '';
+      html += '<div class="card">';
+      html += '<h2 class="card-title"><i class="fas fa-file-alt"></i> 실습 신청서 작성</h2>';
+      html += '<form id="appForm" onsubmit="submitApplication(event)">';
+      html += '<h3 style="margin: 1.5rem 0 1rem; padding-bottom: 0.5rem; border-bottom: 2px solid var(--primary);"><i class="fas fa-user"></i> 개인정보</h3>';
+      html += '<div class="form-row"><div class="form-group"><label class="form-label">성명 <span class="required">*</span></label><input type="text" class="form-input" name="name" required></div>';
+      html += '<div class="form-group"><label class="form-label">생년월일 <span class="required">*</span></label><input type="date" class="form-input" name="birthDate" required></div></div>';
+      html += '<div class="form-row"><div class="form-group"><label class="form-label">성별 <span class="required">*</span></label><select class="form-select" name="gender" required><option value="">선택</option><option value="남">남</option><option value="여">여</option></select></div>';
+      html += '<div class="form-group"><label class="form-label">연락처 <span class="required">*</span></label><input type="tel" class="form-input" name="phone" placeholder="010-0000-0000" required></div></div>';
+      html += '<div class="form-group"><label class="form-label">이메일 <span class="required">*</span></label><input type="email" class="form-input" name="email" required></div>';
+      html += '<div class="form-group"><label class="form-label">주소 <span class="required">*</span></label><input type="text" class="form-input" name="address" required></div>';
+      html += '<h3 style="margin: 2rem 0 1rem; padding-bottom: 0.5rem; border-bottom: 2px solid var(--primary);"><i class="fas fa-school"></i> 학교정보</h3>';
+      html += '<div class="form-row"><div class="form-group"><label class="form-label">학교 <span class="required">*</span></label><input type="text" class="form-input" name="school" required></div>';
+      html += '<div class="form-group"><label class="form-label">학과 <span class="required">*</span></label><input type="text" class="form-input" name="department" required></div></div>';
+      html += '<div class="form-row"><div class="form-group"><label class="form-label">학년 <span class="required">*</span></label><select class="form-select" name="grade" required><option value="">선택</option><option value="3학년">3학년</option><option value="4학년">4학년</option><option value="대학원">대학원</option></select></div>';
+      html += '<div class="form-group"><label class="form-label">학번 <span class="required">*</span></label><input type="text" class="form-input" name="studentId" required></div></div>';
+      html += '<h3 style="margin: 2rem 0 1rem; padding-bottom: 0.5rem; border-bottom: 2px solid var(--primary);"><i class="fas fa-clipboard-check"></i> 실습 관련</h3>';
+      
+      // 실습분야 옵션을 설정에서 가져옴
+      var practiceFieldOptions = '<option value="">선택</option>';
+      console.log('renderApplicationForm - appStatus:', appStatus);
+      console.log('renderApplicationForm - settings:', appStatus ? appStatus.settings : 'no appStatus');
+      console.log('renderApplicationForm - practiceFields:', appStatus && appStatus.settings ? appStatus.settings.practiceFields : 'no settings');
+      
+      if (appStatus && appStatus.settings && appStatus.settings.practiceFields) {
+        var fields = appStatus.settings.practiceFields.split(',');
+        console.log('renderApplicationForm - fields array:', fields);
+        for (var i = 0; i < fields.length; i++) {
+          var field = fields[i].trim();
+          if (field) {
+            practiceFieldOptions += '<option value="' + field + '">' + field + '</option>';
+          }
+        }
+      } else {
+        console.log('renderApplicationForm - using default options');
+        // 기본값 (설정이 없는 경우)
+        practiceFieldOptions += '<option value="사례관리">사례관리</option><option value="서비스제공">서비스제공</option><option value="지역조직">지역조직</option><option value="행정">행정</option>';
+      }
+      html += '<div class="form-group"><label class="form-label">희망 실습 분야 <span class="required">*</span></label><select class="form-select" name="practiceField" required>' + practiceFieldOptions + '</select></div>';
+      html += '<div class="form-group"><label class="form-label">지원동기 <span class="required">*</span></label><textarea class="form-textarea" name="motivation" rows="4" placeholder="지원동기를 작성해 주세요" required></textarea></div>';
+      html += '<div class="form-group"><label class="form-label">자기소개 <span class="required">*</span></label><textarea class="form-textarea" name="introduction" rows="4" placeholder="자기소개를 작성해 주세요" required></textarea></div>';
+      html += '<div class="form-group"><label class="form-label">자원봉사 경험</label><textarea class="form-textarea" name="volunteerExperience" rows="3" placeholder="자원봉사 경험이 있다면 작성해 주세요"></textarea></div>';
+      html += '<div class="form-group"><label class="form-label">이전 실습 경험</label><textarea class="form-textarea" name="previousPractice" rows="3" placeholder="이전 실습 경험이 있다면 작성해 주세요"></textarea></div>';
+      html += '<div class="form-group"><label class="form-label">특기사항</label><textarea class="form-textarea" name="specialNote" placeholder="자격증, 수상경력 등 기타 특기사항"></textarea></div>';
+      html += '<div class="consent-checkbox" style="margin: 1.5rem 0;"><input type="checkbox" id="appPrivacyAgree" required>';
+      html += '<label for="appPrivacyAgree"><a href="#" onclick="openModal(\'privacyModal\'); return false;" style="color: var(--primary);">개인정보 수집·이용</a>에 동의합니다. <span class="required">*</span></label></div>';
+      html += '<button type="submit" class="btn btn-primary" style="width: 100%; padding: 1rem;"><i class="fas fa-paper-plane"></i> 신청서 제출</button>';
+      html += '</form></div>';
+      return html;
+    }
+    
+    function submitApplication(e) {
+      e.preventDefault();
+      
+      if (!document.getElementById('appPrivacyAgree').checked) {
+        showToast('개인정보 수집·이용에 동의해 주세요.', 'warning');
+        return;
+      }
+      
+      const form = document.getElementById('appForm');
+      const formData = {
+        name: form.name.value,
+        birthDate: form.birthDate.value,
+        gender: form.gender.value,
+        phone: form.phone.value,
+        email: form.email.value,
+        address: form.address.value,
+        school: form.school.value,
+        department: form.department.value,
+        grade: form.grade.value,
+        studentId: form.studentId.value,
+        practiceField: form.practiceField.value,
+        motivation: form.motivation.value,
+        introduction: form.introduction.value,
+        volunteerExperience: form.volunteerExperience.value,
+        previousPractice: form.previousPractice.value,
+        specialNote: form.specialNote.value
+      };
+      
+      showLoading(true);
+      google.script.run
+        .withSuccessHandler(function(result) {
+          showLoading(false);
+          if (result.success) {
+            showToast('신청이 완료되었습니다! 확인 메일을 발송했습니다.', 'success');
+            loadApplicationTab();
+          } else {
+            showToast(result.message, 'error');
+          }
+        })
+        .withFailureHandler(handleError)
+        .submitApplication(formData);
+    }
+    
+    // ==================== 합격자 공지 탭 ====================
+    function loadResultsTab() {
+      const year = new Date().getFullYear();
+      
+      google.script.run
+        .withSuccessHandler(function(firstPass) {
+          google.script.run
+            .withSuccessHandler(function(finalPass) {
+              const container = document.getElementById('resultsContent');
+              
+              if (firstPass.length === 0 && finalPass.length === 0) {
+                container.innerHTML = '<div class="empty-state"><i class="fas fa-bullhorn"></i><p>아직 발표된 합격자가 없습니다.</p></div>';
+                return;
+              }
+              
+              var html = '';
+              
+              if (finalPass.length > 0) {
+                html += '<h3 style="margin: 1.5rem 0 1rem;"><i class="fas fa-crown" style="color: gold;"></i> 최종 합격자</h3><div class="result-grid">';
+                for (var i = 0; i < finalPass.length; i++) {
+                  var s = finalPass[i];
+                  html += '<div class="result-card" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%);"><div class="name">' + s.displayName + '</div><div class="stage">최종 합격</div></div>';
+                }
+                html += '</div>';
+              }
+              
+              if (firstPass.length > 0) {
+                html += '<h3 style="margin: 2rem 0 1rem;"><i class="fas fa-medal" style="color: silver;"></i> 1차 합격자</h3><div class="result-grid">';
+                for (var j = 0; j < firstPass.length; j++) {
+                  var s2 = firstPass[j];
+                  if (s2.stage === '1차') {
+                    html += '<div class="result-card"><div class="name">' + s2.displayName + '</div><div class="stage">1차 합격</div></div>';
+                  }
+                }
+                html += '</div>';
+              }
+              
+              container.innerHTML = html;
+            })
+            .withFailureHandler(handleError)
+            .getPassedStudents(year, '최종');
+        })
+        .withFailureHandler(handleError)
+        .getPassedStudents(year, null);
+    }
+    
+    // ==================== 최종합격자 정보입력 탭 ====================
+    function loadFinalInfoTab() {
+      const container = document.getElementById('finalInfoContent');
+      
+      // 테스트 모드인 경우 바로 폼 표시
+      if (appStatus && appStatus.isTestMode) {
+        google.script.run
+          .withSuccessHandler(function(info) {
+            info = info || { name: appStatus.user.email.split('@')[0], testMode: true };
+            container.innerHTML = '<div class="alert alert-info" style="background: #fff3cd; border-color: #ffc107;"><i class="fas fa-flask"></i><div><strong>테스트 모드</strong> - 실제 최종합격자가 아니어도 테스트할 수 있습니다.</div></div>' + renderFinalInfoForm(info);
+          })
+          .withFailureHandler(handleError)
+          .getFinalInfo();
+        return;
+      }
+      
+      google.script.run
+        .withSuccessHandler(function(status) {
+          if (!status || (status.status !== '최종합격' && status.status !== '1차합격')) {
+            container.innerHTML = '<div class="alert alert-warning"><i class="fas fa-exclamation-triangle"></i><div>최종 합격자만 정보를 입력할 수 있습니다.</div></div>';
+            return;
+          }
+          
+          google.script.run
+            .withSuccessHandler(function(info) {
+              container.innerHTML = renderFinalInfoForm(info);
+            })
+            .withFailureHandler(handleError)
+            .getFinalInfo();
+        })
+        .withFailureHandler(handleError)
+        .getMyApplicationStatus();
+    }
+    
+    function renderFinalInfoForm(info) {
+      info = info || {};
+      var html = '<div class="alert alert-info"><i class="fas fa-info-circle"></i><div>실습보험 가입 및 학교 공문 발송을 위해 필요한 정보입니다. 정확하게 입력해 주세요.</div></div>';
+      html += '<form id="finalInfoForm" onsubmit="submitFinalInfo(event)">';
+      html += '<div class="form-row"><div class="form-group"><label class="form-label">성명 <span class="required">*</span></label>';
+      html += '<input type="text" class="form-input" name="name" value="' + (info.name || '') + '" required></div>';
+      html += '<div class="form-group"><label class="form-label">주민등록번호 <span class="required">*</span></label>';
+      html += '<input type="text" class="form-input" name="ssn" value="' + (info.ssn || '') + '" placeholder="000000-0000000" required>';
+      html += '<small style="color: var(--secondary);">실습보험 가입용</small></div></div>';
+      html += '<div class="form-row"><div class="form-group"><label class="form-label">학교 <span class="required">*</span></label>';
+      html += '<input type="text" class="form-input" name="school" value="' + (info.school || '') + '" required></div>';
+      html += '<div class="form-group"><label class="form-label">학과 <span class="required">*</span></label>';
+      html += '<input type="text" class="form-input" name="department" value="' + (info.department || '') + '" required></div></div>';
+      html += '<div class="form-group"><label class="form-label">실습지도교수 <span class="required">*</span></label>';
+      html += '<input type="text" class="form-input" name="professor" value="' + (info.professor || '') + '" required></div>';
+      html += '<div class="form-group"><label class="form-label">공문 수신 이메일 <span class="required">*</span></label>';
+      html += '<input type="email" class="form-input" name="officialEmail" value="' + (info.officialEmail || '') + '" placeholder="학교에서 공문을 수신할 수 있는 이메일" required></div>';
+      html += '<div class="form-group"><label class="form-label">비고</label>';
+      html += '<textarea class="form-textarea" name="note">' + (info.note || '') + '</textarea></div>';
+      html += '<div class="consent-checkbox" style="margin: 1.5rem 0;"><input type="checkbox" id="finalPrivacyAgree" required>';
+      html += '<label for="finalPrivacyAgree">개인정보(주민등록번호 포함) 수집·이용에 동의합니다. <span class="required">*</span></label></div>';
+      html += '<button type="submit" class="btn btn-primary" style="width: 100%;"><i class="fas fa-save"></i> 저장</button></form>';
+      return html;
+    }
+    
+    function submitFinalInfo(e) {
+      e.preventDefault();
+      
+      const form = document.getElementById('finalInfoForm');
+      const formData = {
+        name: form.name.value,
+        ssn: form.ssn.value,
+        school: form.school.value,
+        department: form.department.value,
+        professor: form.professor.value,
+        officialEmail: form.officialEmail.value,
+        note: form.note.value
+      };
+      
+      showLoading(true);
+      google.script.run
+        .withSuccessHandler(function(result) {
+          showLoading(false);
+          if (result.success) {
+            showToast('정보가 저장되었습니다.', 'success');
+          } else {
+            showToast(result.message, 'error');
+          }
+        })
+        .withFailureHandler(handleError)
+        .saveFinalInfo(formData);
+    }
+    
+    // ==================== 실습안내 탭 ====================
+    function loadNoticeTab() {
+      loadNotices(1);
+      loadPracticePlan();
+    }
+    
+    function loadNotices(page) {
+      noticePage = page;
+      
+      google.script.run
+        .withSuccessHandler(function(result) {
+          const container = document.getElementById('noticeList');
+          
+          if (result.items.length === 0) {
+            container.innerHTML = '<div class="empty-state"><i class="fas fa-inbox"></i><p>등록된 공지사항이 없습니다.</p></div>';
+            document.getElementById('noticePagination').innerHTML = '';
+            return;
+          }
+          
+          var rows = '';
+          for (var i = 0; i < result.items.length; i++) {
+            var n = result.items[i];
+            var fileIcon = n.fileId ? '<i class="fas fa-paperclip" style="color: var(--secondary); margin-left: 0.5rem;"></i>' : '';
+            var safeTitle = (n.title || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+            rows += '<tr onclick="viewNotice(\'' + n.id + '\')" style="cursor: pointer;"><td>' + safeTitle + fileIcon + '</td><td>' + (n.author || '') + '</td><td>' + (n.createdAt || '').substring(0, 10) + '</td><td>' + (n.views || 0) + '</td></tr>';
+          }
+          
+          container.innerHTML = '<div class="table-container"><table class="table"><thead><tr><th style="width: 60%;">제목</th><th>작성자</th><th>작성일</th><th>조회</th></tr></thead><tbody>' + rows + '</tbody></table></div>';
+          
+          // Pagination
+          const pagination = document.getElementById('noticePagination');
+          if (result.totalPages > 1) {
+            var paginationHtml = '';
+            for (var j = 1; j <= result.totalPages; j++) {
+              paginationHtml += '<button class="page-btn ' + (j === page ? 'active' : '') + '" onclick="loadNotices(' + j + ')">' + j + '</button>';
+            }
+            pagination.innerHTML = paginationHtml;
+          } else {
+            pagination.innerHTML = '';
+          }
+        })
+        .withFailureHandler(handleError)
+        .getNotices(page, 10, '실습생');
+    }
+    
+    function viewNotice(id) {
+      google.script.run
+        .withSuccessHandler(function(notice) {
+          document.getElementById('noticeModalTitle').textContent = notice.title;
+          var safeContent = (notice.content || '').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+          var fileSection = '';
+          if (notice.fileId) {
+            fileSection = '<div style="margin-top: 1.5rem; padding-top: 1rem; border-top: 1px solid var(--border);"><strong><i class="fas fa-paperclip"></i> 첨부파일</strong><div class="file-info"><span>' + (notice.fileName || '첨부파일') + '</span><button class="btn btn-outline" onclick="downloadFile(\'' + notice.fileId + '\')"><i class="fas fa-download"></i> 다운로드</button></div></div>';
+          }
+          document.getElementById('noticeModalBody').innerHTML = '<div style="color: var(--secondary); margin-bottom: 1rem; font-size: 0.875rem;">작성자: ' + (notice.author || '') + ' | 작성일: ' + (notice.createdAt || '') + ' | 조회: ' + (notice.views || 0) + '</div><div style="white-space: pre-wrap; line-height: 1.8;">' + safeContent + '</div>' + fileSection;
+          openModal('noticeModal');
+        })
+        .withFailureHandler(handleError)
+        .getNotice(id);
+    }
+    
+    function loadPracticePlan() {
+      google.script.run
+        .withSuccessHandler(function(plan) {
+          const container = document.getElementById('practicePlan');
+          
+          if (!plan) {
+            container.innerHTML = '<div class="empty-state"><i class="fas fa-file-alt"></i><p>등록된 실습계획서가 없습니다.</p></div>';
+            return;
+          }
+          
+          var downloadBtn = plan.fileId ? '<button class="btn btn-primary" onclick="downloadFile(\'' + plan.fileId + '\')"><i class="fas fa-download"></i> 다운로드</button>' : '<span style="color: var(--secondary);">파일 없음</span>';
+          container.innerHTML = '<div class="file-info"><span><i class="fas fa-file-pdf" style="color: #ef4444;"></i> ' + (plan.fileName || '실습계획서') + '</span>' + downloadBtn + '</div>';
+        })
+        .withFailureHandler(handleError)
+        .getPracticePlan();
+    }
+    
+    // ==================== 출석부 탭 ====================
+    function loadAttendanceTab() {
+      // 합격자에 한해서만 위치 조회 요청
+      if (appStatus && appStatus.user && !locationRequested) {
+        requestLocationPermission();
+      }
+      loadMyAttendance();
+    }
+    
+    function updateClock() {
+      const now = new Date();
+      const options = { 
+        year: 'numeric', 
+        month: 'long', 
+        day: 'numeric', 
+        weekday: 'long' 
+      };
+      document.getElementById('currentDate').textContent = now.toLocaleDateString('ko-KR', options);
+      document.getElementById('currentTime').textContent = now.toLocaleTimeString('ko-KR');
+    }
+    
+    function requestLocationPermission() {
+      locationRequested = true;
+      getLocation();
+    }
+    
+    function getLocation() {
+      if (navigator.geolocation) {
+        document.getElementById('locationInfo').innerHTML = '<i class="fas fa-spinner fa-spin"></i> 위치 확인 중...';
+        
+        navigator.geolocation.getCurrentPosition(
+          function(position) {
+            currentLocation = {
+              lat: position.coords.latitude,
+              lng: position.coords.longitude
+            };
+            // 주소 변환 (Kakao API 사용)
+            getAddressFromCoords(position.coords.latitude, position.coords.longitude);
+          },
+          function(error) {
+            console.log('위치 오류:', error);
+            document.getElementById('locationInfo').innerHTML = '<span style="color: var(--warning);"><i class="fas fa-exclamation-triangle"></i> 위치 정보를 가져올 수 없습니다. <button class="btn btn-sm" onclick="getLocation()">재시도</button></span>';
+          },
+          {
+            enableHighAccuracy: true,
+            timeout: 10000,
+            maximumAge: 60000
+          }
+        );
+      } else {
+        document.getElementById('locationInfo').innerHTML = '<span style="color: var(--danger);"><i class="fas fa-times-circle"></i> 이 브라우저는 위치 서비스를 지원하지 않습니다.</span>';
+      }
+    }
+    
+    function getAddressFromCoords(lat, lng) {
+      // Kakao Maps REST API로 주소 변환
+      const kakaoApiKey = '발급받은_REST_API_KEY';  // Kakao REST API Key 필요
+      
+      // Kakao API가 없으면 Google Geocoding 사용 시도
+      // 간단하게 Nominatim (무료 OpenStreetMap) 사용
+      fetch('https://nominatim.openstreetmap.org/reverse?format=json&lat=' + lat + '&lon=' + lng + '&zoom=18&addressdetails=1', {
+        headers: {
+          'Accept-Language': 'ko'
+        }
+      })
+      .then(response => response.json())
+      .then(data => {
+        if (data && data.display_name) {
+          // 주소에서 한국 부분만 추출
+          let address = data.display_name;
+          // 너무 긴 주소는 간략화
+          if (address.length > 50) {
+            const parts = address.split(', ');
+            address = parts.slice(0, 4).join(' ');
+          }
+          currentLocation.address = address;
+          document.getElementById('locationInfo').innerHTML = '<i class="fas fa-map-marker-alt" style="color: var(--success);"></i> <span style="font-size: 0.9rem;">' + address + '</span>';
+        } else {
+          currentLocation.address = lat.toFixed(6) + ', ' + lng.toFixed(6);
+          document.getElementById('locationInfo').innerHTML = '<i class="fas fa-map-marker-alt" style="color: var(--success);"></i> 위치 확인됨 (좌표: ' + lat.toFixed(4) + ', ' + lng.toFixed(4) + ')';
+        }
+      })
+      .catch(error => {
+        console.log('주소 변환 오류:', error);
+        currentLocation.address = '위치 확인됨 (' + lat.toFixed(4) + ', ' + lng.toFixed(4) + ')';
+        document.getElementById('locationInfo').innerHTML = '<i class="fas fa-map-marker-alt" style="color: var(--success);"></i> 위치 확인됨';
+      });
+    }
+    
+    function recordAttendance(type) {
+      if (!currentLocation) {
+        // 위치 정보가 없으면 재요청
+        showToast('위치 정보를 확인 중입니다. 잠시 후 다시 시도해 주세요.', 'warning');
+        getLocation();
+        return;
+      }
+      
+      if (!currentLocation.address) {
+        currentLocation.address = '위치 정보 없음';
+      }
+      
+      showLoading(true);
+      google.script.run
+        .withSuccessHandler(function(result) {
+          showLoading(false);
+          if (result.success) {
+            showToast(result.message, 'success');
+            loadMyAttendance();
+          } else {
+            showToast(result.message, 'error');
+          }
+        })
+        .withFailureHandler(handleError)
+        .recordAttendance(type, currentLocation, loggedInEmail);
+    }
+    
+    function loadMyAttendance() {
+      // 기본 날짜 설정
+      const startInput = document.getElementById('myAttendanceStart');
+      const endInput = document.getElementById('myAttendanceEnd');
+      
+      if (!startInput.value) {
+        // 설정에서 실습 시작일 가져오기, 없으면 3개월 전
+        if (appStatus && appStatus.settings && appStatus.settings.practiceStart) {
+          startInput.value = appStatus.settings.practiceStart;
+        } else {
+          const now = new Date();
+          const threeMonthsAgo = new Date(now.getFullYear(), now.getMonth() - 3, 1);
+          startInput.value = threeMonthsAgo.getFullYear() + '-' + String(threeMonthsAgo.getMonth() + 1).padStart(2, '0') + '-' + String(threeMonthsAgo.getDate()).padStart(2, '0');
+        }
+      }
+      if (!endInput.value) {
+        // 설정에서 실습 종료일 가져오기, 없으면 오늘
+        if (appStatus && appStatus.settings && appStatus.settings.practiceEnd) {
+          endInput.value = appStatus.settings.practiceEnd;
+        } else {
+          const now = new Date();
+          endInput.value = now.getFullYear() + '-' + String(now.getMonth() + 1).padStart(2, '0') + '-' + String(now.getDate()).padStart(2, '0');
+        }
+      }
+      
+      loadMyAttendanceList();
+    }
+    
+    function loadMyAttendanceList() {
+      const startDate = document.getElementById('myAttendanceStart').value;
+      const endDate = document.getElementById('myAttendanceEnd').value;
+      
+      console.log('loadMyAttendanceList - startDate:', startDate, 'endDate:', endDate);
+      
+      showLoading(true);
+      google.script.run
+        .withSuccessHandler(function(records) {
+          showLoading(false);
+          console.log('loadMyAttendanceList - received records:', records);
+          console.log('loadMyAttendanceList - records length:', records ? records.length : 'null');
+          
+          records = records || [];
+          const container = document.getElementById('attendanceList');
+          
+          if (records.length === 0) {
+            container.innerHTML = '<div class="empty-state"><i class="fas fa-calendar-times"></i><p>해당 기간의 출석 기록이 없습니다.</p></div>';
+            return;
+          }
+          
+          // 총 근무시간 계산
+          let totalMinutes = 0;
+          records.forEach(r => {
+            if (r.checkin && r.checkout) {
+              const [inH, inM] = r.checkin.split(':').map(Number);
+              const [outH, outM] = r.checkout.split(':').map(Number);
+              const minutes = (outH * 60 + outM) - (inH * 60 + inM);
+              if (minutes > 0) totalMinutes += minutes;
+            }
+          });
+          const totalHours = Math.floor(totalMinutes / 60);
+          const remainMinutes = totalMinutes % 60;
+          
+          var rows = '';
+          for (var i = 0; i < records.length; i++) {
+            var r = records[i];
+            var workTime = '-';
+            if (r.checkin && r.checkout) {
+              var inParts = r.checkin.split(':').map(Number);
+              var outParts = r.checkout.split(':').map(Number);
+              var mins = (outParts[0] * 60 + outParts[1]) - (inParts[0] * 60 + inParts[1]);
+              if (mins > 0) workTime = Math.floor(mins / 60) + 'h ' + (mins % 60) + 'm';
+            }
+            rows += '<tr><td>' + (r.date || '') + '</td><td>' + (r.checkin || '-') + '</td><td>' + (r.checkout || '-') + '</td><td>' + workTime + '</td></tr>';
+          }
+          
+          container.innerHTML = `
+            <div class="alert alert-info" style="margin-bottom: 1rem;">
+              <i class="fas fa-chart-bar"></i>
+              <div><strong>총 ${records.length}일 출석</strong> | 총 근무시간: ${totalHours}시간 ${remainMinutes}분</div>
+            </div>
+            <div class="table-container">
+              <table class="table">
+                <thead><tr><th>날짜</th><th>출근</th><th>퇴근</th><th>근무시간</th></tr></thead>
+                <tbody>${rows}</tbody>
+              </table>
+            </div>`;
+        })
+        .withFailureHandler(function(error) {
+          showLoading(false);
+          console.error('loadMyAttendanceList error:', error);
+          handleError(error);
+        })
+        .getMyAttendance(startDate, endDate, loggedInEmail);
+    }
+    
+    function openMyAttendancePrintModal() {
+      // 기본 날짜 설정
+      var startDate = document.getElementById('myAttendanceStart').value;
+      var endDate = document.getElementById('myAttendanceEnd').value;
+      
+      if (!startDate && appStatus && appStatus.settings && appStatus.settings.practiceStart) {
+        startDate = appStatus.settings.practiceStart;
+      }
+      if (!endDate && appStatus && appStatus.settings && appStatus.settings.practiceEnd) {
+        endDate = appStatus.settings.practiceEnd;
+      }
+      
+      document.getElementById('myPrintStartDate').value = startDate || '';
+      document.getElementById('myPrintEndDate').value = endDate || '';
+      openModal('myAttendancePrintModal');
+    }
+    
+    function printMyAttendanceReport() {
+      var startDate = document.getElementById('myPrintStartDate').value;
+      var endDate = document.getElementById('myPrintEndDate').value;
+      
+      if (!startDate || !endDate) {
+        showToast('기간을 선택해주세요.', 'warning');
+        return;
+      }
+      
+      showLoading(true);
+      google.script.run.withSuccessHandler(function(result) {
+        showLoading(false);
+        if (result.success) {
+          closeModal('myAttendancePrintModal');
+          // base64 PDF 다운로드
+          downloadBase64PDF(result.pdfBase64, result.fileName);
+          showToast('출석부가 생성되었습니다.', 'success');
+        } else {
+          showToast(result.message, 'error');
+        }
+      }).withFailureHandler(handleError).generateMyAttendanceReport(startDate, endDate, loggedInEmail);
+    }
+    
+    // base64 PDF 다운로드 헬퍼
+    function downloadBase64PDF(base64, fileName) {
+      const byteCharacters = atob(base64);
+      const byteNumbers = new Array(byteCharacters.length);
+      for (let i = 0; i < byteCharacters.length; i++) {
+        byteNumbers[i] = byteCharacters.charCodeAt(i);
+      }
+      const byteArray = new Uint8Array(byteNumbers);
+      const blob = new Blob([byteArray], { type: 'application/pdf' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = fileName;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    }
+    
+    // ==================== 실습서식 탭 ====================
+    function loadFormsTab() {
+      google.script.run
+        .withSuccessHandler(function(forms) {
+          const container = document.getElementById('formsList');
+          forms = forms || [];
+          
+          if (forms.length === 0) {
+            container.innerHTML = '<div class="empty-state"><i class="fas fa-folder-open"></i><p>등록된 서식이 없습니다.</p></div>';
+            return;
+          }
+          
+          var rows = '';
+          for (var i = 0; i < forms.length; i++) {
+            var f = forms[i];
+            var safeName = (f.name || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+            var safeDesc = (f.description || '-').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+            var downloadBtn = f.fileId ? '<button class="btn btn-outline" onclick="downloadFile(\'' + f.fileId + '\')"><i class="fas fa-download"></i> 다운로드</button>' : '<span style="color: var(--secondary);">파일 없음</span>';
+            rows += '<tr><td><strong>' + safeName + '</strong></td><td>' + safeDesc + '</td><td>' + downloadBtn + '</td></tr>';
+          }
+          
+          container.innerHTML = '<div class="table-container"><table class="table"><thead><tr><th>서식명</th><th>설명</th><th>다운로드</th></tr></thead><tbody>' + rows + '</tbody></table></div>';
+        })
+        .withFailureHandler(handleError)
+        .getForms();
+    }
+    
+    // ==================== 과제제출 탭 ====================
+    function loadSubmissionTab() {
+      // 테스트 모드인 경우 알림 표시
+      if (appStatus && appStatus.isTestMode) {
+        var testAlert = document.createElement('div');
+        testAlert.className = 'alert alert-info';
+        testAlert.style.cssText = 'background: #fff3cd; border-color: #ffc107; margin-bottom: 1rem;';
+        testAlert.innerHTML = '<i class="fas fa-flask"></i><div><strong>테스트 모드</strong> - 실제 최종합격자가 아니어도 과제를 제출할 수 있습니다.</div>';
+        var formContainer = document.getElementById('submissionForm');
+        if (formContainer && !formContainer.querySelector('.fa-flask')) {
+          formContainer.parentNode.insertBefore(testAlert, formContainer);
+        }
+      }
+      loadSubmissionForm();
+      loadMySubmissions();
+    }
+    
+
+    function loadSubmissionForm() {
+      google.script.run
+        .withSuccessHandler(function(forms) {
+          forms = forms || [];
+          var container = document.getElementById('submissionForm');
+          
+          var formOptions = '';
+          for (var i = 0; i < forms.length; i++) {
+            var f = forms[i];
+            var safeName = (f.name || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+            var safeType = (f.type || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+            formOptions += '<option value="' + (f.id || '') + '" data-name="' + safeName + '" data-type="' + safeType + '" data-fileid="' + (f.fileId || '') + '">' + safeName + ' (' + safeType + ')</option>';
+          }
+          
+          var html = '';
+          html += '<form id="submitForm" onsubmit="submitAssignment(event)">';
+          html += '<div class="form-row"><div class="form-group">';
+          html += '<label class="form-label">서식 선택 <span class="required">*</span></label>';
+          html += '<select class="form-select" name="formSelect" id="formSelect" required onchange="onFormSelect()">';
+          html += '<option value="">서식을 선택하세요</option>';
+          html += formOptions;
+          html += '<option value="custom">직접 입력 (기타)</option>';
+          html += '</select></div>';
+          html += '<div class="form-group" id="customTypeGroup" style="display: none;">';
+          html += '<label class="form-label">과제 유형</label>';
+          html += '<input type="text" class="form-input" name="customType" placeholder="유형을 입력하세요">';
+          html += '</div></div>';
+          
+          html += '<div id="formDownloadArea" class="alert alert-info" style="display: none;">';
+          html += '<i class="fas fa-download"></i><div>';
+          html += '<strong id="selectedFormName"></strong> 양식을 다운로드하여 작성 후 업로드하세요.';
+          html += '<button type="button" class="btn btn-outline btn-sm" style="margin-left: 1rem;" onclick="downloadSelectedForm()">';
+          html += '<i class="fas fa-file-download"></i> 양식 다운로드</button></div></div>';
+          
+          html += '<div class="form-group">';
+          html += '<label class="form-label">제출 방식 <span class="required">*</span></label>';
+          html += '<div style="display: flex; gap: 1rem;">';
+          html += '<label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer;">';
+          html += '<input type="radio" name="submitType" value="file" checked onchange="toggleSubmitType()"> ';
+          html += '<i class="fas fa-file-upload"></i> 파일 업로드</label>';
+          html += '<label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer;">';
+          html += '<input type="radio" name="submitType" value="direct" onchange="toggleSubmitType()"> ';
+          html += '<i class="fas fa-edit"></i> 직접 입력</label></div></div>';
+          
+          html += '<div class="form-group"><label class="form-label">제목 <span class="required">*</span></label>';
+          html += '<input type="text" class="form-input" name="title" required></div>';
+          
+          html += '<div id="fileUploadArea"><div class="form-group">';
+          html += '<label class="form-label">파일 첨부 <span class="required">*</span></label>';
+          html += '<div class="file-upload" onclick="document.getElementById(\'submissionFile\').click()">';
+          html += '<i class="fas fa-cloud-upload-alt"></i>';
+          html += '<p>클릭하여 파일을 선택하세요</p>';
+          html += '<small>한글, PDF, 엑셀 등 (최대 100MB)</small>';
+          html += '<input type="file" id="submissionFile" accept=".hwp,.hwpx,.doc,.docx,.pdf,.xls,.xlsx,.ppt,.pptx,.zip,.jpg,.png">';
+          html += '</div><div id="selectedFile"></div></div>';
+          html += '<div class="form-group"><label class="form-label">추가 설명</label>';
+          html += '<textarea class="form-textarea" name="content" rows="3" placeholder="간단한 설명을 입력하세요. (선택사항)"></textarea>';
+          html += '</div></div>';
+          
+          html += '<div id="directInputArea" style="display: none;">';
+          html += '<div class="form-group"><label class="form-label"><i class="fas fa-file-alt"></i> 서식 템플릿 불러오기</label>';
+          html += '<div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">';
+          html += '<select class="form-select" id="templateSelect" style="flex: 1; min-width: 200px;">';
+          html += '<option value="">-- 템플릿 선택 --</option>';
+          html += '<optgroup label="📋 별지 서식">';
+          html += '<option value="contract">별지6. 실습계약서</option>';
+          html += '<option value="profile">별지3. 실습생 Profile</option>';
+          html += '<option value="daily_log">별지8. 실습일지</option>';
+          html += '<option value="org_analysis">별지9. 기관분석보고서</option>';
+          html += '<option value="community_analysis">별지10. 지역사회분석보고서</option>';
+          html += '<option value="other_report">별지12. 기타과제보고서</option>';
+          html += '<option value="book_review">별지13. 필독서 서평보고서</option>';
+          html += '<option value="mid_evaluation">별지14. 실습중간평가서</option>';
+          html += '<option value="final_evaluation">별지15. 실습종결평가서</option>';
+          html += '<option value="privacy_consent">별지2. 개인정보 수집·이용 동의서</option>';
+          html += '</optgroup>';
+          html += '<optgroup label="📁 사례관리 서식">';
+          html += '<option value="case_counseling">사례관리 상담기록지</option>';
+          html += '<option value="case_process_record">사례관리 과정 기록지</option>';
+          html += '<option value="case_activity_eval">사례관리활동 평가서</option>';
+          html += '<option value="case_eval_meal">점검 및 평가 기록지 (무료급식)</option>';
+          html += '<option value="case_eval_simple">점검 및 평가 기록지 (단순사례)</option>';
+          html += '</optgroup>';
+          html += '<optgroup label="📊 프로그램 서식">';
+          html += '<option value="program_plan">프로그램 실행계획서</option>';
+          html += '<option value="program_result">프로그램 실행결과보고서</option>';
+          html += '<option value="program_eval">프로그램 종합평가서</option>';
+          html += '</optgroup></select>';
+          html += '<button type="button" class="btn btn-secondary" onclick="loadTemplate()">';
+          html += '<i class="fas fa-download"></i> 템플릿 불러오기</button>';
+          html += '<button type="button" class="btn btn-outline" onclick="clearEditor()">';
+          html += '<i class="fas fa-eraser"></i> 초기화</button>';
+          html += '<button type="button" class="btn btn-success" onclick="saveDraft()" style="margin-left: auto;">';
+          html += '<i class="fas fa-save"></i> 임시저장</button>';
+          html += '<button type="button" class="btn btn-info" onclick="loadDraft()">';
+          html += '<i class="fas fa-folder-open"></i> 불러오기</button></div>';
+          html += '<small style="color: #666; display: block; margin-top: 0.5rem;">';
+          html += '<i class="fas fa-lightbulb"></i> 템플릿을 선택하고 불러오면 양식이 자동으로 채워집니다. | ';
+          html += '<i class="fas fa-info-circle"></i> 임시저장된 내용은 브라우저에 저장되며, 제출 전까지 유지됩니다.</small></div>';
+          
+          html += '<div class="form-group"><label class="form-label">내용 <span class="required">*</span></label>';
+          html += '<div style="margin-bottom: 10px; padding: 10px; background: #f0f7ff; border-radius: 8px; display: flex; flex-wrap: wrap; gap: 5px; align-items: center;">';
+          html += '<span style="font-weight: 600; margin-right: 10px;"><i class="fas fa-table"></i> 표 도구:</span>';
+          html += '<button type="button" class="btn btn-outline" style="padding: 5px 10px; font-size: 0.85rem;" onclick="showTableSizeModal()"><i class="fas fa-table"></i> 표 삽입</button>';
+          html += '<button type="button" class="btn btn-outline" style="padding: 5px 10px; font-size: 0.85rem;" onclick="addTableRow()"><i class="fas fa-plus"></i> 행 추가</button>';
+          html += '<button type="button" class="btn btn-outline" style="padding: 5px 10px; font-size: 0.85rem;" onclick="addTableColumn()"><i class="fas fa-plus"></i> 열 추가</button>';
+          html += '<button type="button" class="btn btn-outline" style="padding: 5px 10px; font-size: 0.85rem;" onclick="deleteTableRow()"><i class="fas fa-minus"></i> 행 삭제</button>';
+          html += '<button type="button" class="btn btn-outline" style="padding: 5px 10px; font-size: 0.85rem;" onclick="deleteTableColumn()"><i class="fas fa-minus"></i> 열 삭제</button>';
+          html += '<button type="button" class="btn btn-outline" style="padding: 5px 10px; font-size: 0.85rem;" onclick="mergeCells()"><i class="fas fa-compress-alt"></i> 셀 합치기</button></div>';
+          html += '<small style="color: #666; display: block; margin-bottom: 8px;"><i class="fas fa-info-circle"></i> 셀 합치기: Ctrl+클릭으로 여러 셀 선택 후 버튼 클릭</small>';
+          html += '<div id="summernoteEditor"></div></div>';
+          
+          html += '<div class="form-group"><label class="form-label">추가 첨부 파일 (선택)</label>';
+          html += '<div class="file-upload" onclick="document.getElementById(\'directFile\').click()">';
+          html += '<i class="fas fa-paperclip"></i><p>이미지나 참고 자료를 첨부하세요</p><small>이미지, PDF 등</small>';
+          html += '<input type="file" id="directFile" accept=".hwp,.hwpx,.doc,.docx,.pdf,.jpg,.jpeg,.png,.gif">';
+          html += '</div><div id="selectedDirectFile"></div></div></div>';
+          
+          html += '<button type="submit" class="btn btn-primary" style="width: 100%;"><i class="fas fa-paper-plane"></i> 제출</button>';
+          html += '</form>';
+          
+          container.innerHTML = html;
+          
+          $('#summernoteEditor').summernote({
+            lang: 'ko-KR',
+            height: 400,
+            placeholder: '내용을 입력하세요...',
+            toolbar: [
+              ['style', ['style']],
+              ['font', ['bold', 'italic', 'underline', 'strikethrough', 'clear']],
+              ['fontsize', ['fontsize']],
+              ['color', ['color']],
+              ['para', ['ul', 'ol', 'paragraph']],
+              ['insert', ['link', 'picture']],
+              ['view', ['fullscreen', 'codeview', 'help']]
+            ],
+            fontSizes: ['8', '9', '10', '11', '12', '14', '16', '18', '20', '24', '36'],
+            styleTags: ['p', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6']
+          });
+          
+          document.getElementById('submissionFile').addEventListener('change', function(e) {
+            var file = e.target.files[0];
+            if (file) {
+              document.getElementById('selectedFile').innerHTML = '<div class="file-info"><span><i class="fas fa-file"></i> ' + file.name + '</span><button type="button" class="btn btn-danger btn-sm" onclick="clearFile(\'submissionFile\', \'selectedFile\')"><i class="fas fa-times"></i></button></div>';
+            }
+          });
+          
+          document.getElementById('directFile').addEventListener('change', function(e) {
+            var file = e.target.files[0];
+            if (file) {
+              document.getElementById('selectedDirectFile').innerHTML = '<div class="file-info"><span><i class="fas fa-file"></i> ' + file.name + '</span><button type="button" class="btn btn-danger btn-sm" onclick="clearFile(\'directFile\', \'selectedDirectFile\')"><i class="fas fa-times"></i></button></div>';
+            }
+          });
+          
+          // 자동 임시저장 시작
+          startAutoSave();
+          
+          // 임시저장된 내용이 있으면 알림 표시
+          checkDraftExists();
+        })
+        .withFailureHandler(handleError)
+        .getForms();
+    }
+    
+    // 임시저장 존재 여부 확인 및 알림
+    function checkDraftExists() {
+      try {
+        var draftJson = localStorage.getItem('internship_submission_draft');
+        if (draftJson) {
+          var draft = JSON.parse(draftJson);
+          var savedDate = new Date(draft.savedAt);
+          var timeAgo = getTimeAgo(savedDate);
+          
+          // 임시저장 알림 표시
+          var alertDiv = document.createElement('div');
+          alertDiv.id = 'draftAlert';
+          alertDiv.className = 'alert alert-info';
+          alertDiv.style.cssText = 'display: flex; align-items: center; gap: 10px; margin-bottom: 15px;';
+          alertDiv.innerHTML = '<i class="fas fa-clock"></i><div style="flex: 1;"><strong>임시저장된 내용이 있습니다.</strong><br><small>' + timeAgo + ' 저장됨</small></div><button type="button" class="btn btn-info btn-sm" onclick="loadDraft(); closeDraftAlert();"><i class="fas fa-folder-open"></i> 불러오기</button><button type="button" class="btn btn-outline btn-sm" onclick="closeDraftAlert()"><i class="fas fa-times"></i></button>';
+          
+          var form = document.getElementById('submitForm');
+          if (form) {
+            form.insertBefore(alertDiv, form.firstChild);
+          }
+        }
+      } catch (e) {
+        console.error('임시저장 확인 오류:', e);
+      }
+    }
+    
+    // 임시저장 알림 닫기
+    function closeDraftAlert() {
+      var alert = document.getElementById('draftAlert');
+      if (alert) {
+        alert.remove();
+      }
+    }
+    
+    function onFormSelect() {
+      const select = document.getElementById('formSelect');
+      const option = select.options[select.selectedIndex];
+      const customGroup = document.getElementById('customTypeGroup');
+      const downloadArea = document.getElementById('formDownloadArea');
+      
+      if (select.value === 'custom') {
+        customGroup.style.display = 'block';
+        downloadArea.style.display = 'none';
+      } else if (select.value) {
+        customGroup.style.display = 'none';
+        downloadArea.style.display = 'flex';
+        document.getElementById('selectedFormName').textContent = option.dataset.name;
+      } else {
+        customGroup.style.display = 'none';
+        downloadArea.style.display = 'none';
+      }
+    }
+    
+    function downloadSelectedForm() {
+      const select = document.getElementById('formSelect');
+      const option = select.options[select.selectedIndex];
+      const fileId = option.dataset.fileid;
+      
+      if (fileId) {
+        showLoading(true);
+        google.script.run
+          .withSuccessHandler(function(result) {
+            showLoading(false);
+            if (result.success) {
+              window.open(result.url, '_blank');
+            } else {
+              showToast('파일을 열 수 없습니다.', 'error');
+            }
+          })
+          .withFailureHandler(handleError)
+          .getFileDownloadUrl(fileId);
+      }
+    }
+    
+    function toggleSubmitType() {
+      const submitType = document.querySelector('input[name="submitType"]:checked').value;
+      const fileArea = document.getElementById('fileUploadArea');
+      const directArea = document.getElementById('directInputArea');
+      
+      if (submitType === 'file') {
+        fileArea.style.display = 'block';
+        directArea.style.display = 'none';
+      } else {
+        fileArea.style.display = 'none';
+        directArea.style.display = 'block';
+      }
+    }
+    
+    // 템플릿 불러오기
+    function loadTemplate() {
+      const templateSelect = document.getElementById('templateSelect');
+      const templateType = templateSelect.value;
+      
+      if (!templateType) {
+        showToast('템플릿을 선택해주세요.', 'warning');
+        return;
+      }
+      
+      // 현재 에디터에 내용이 있으면 확인
+      const currentContent = $('#summernoteEditor').summernote('code');
+      const textContent = $('<div>').html(currentContent).text().trim();
+      
+      if (textContent.length > 10) {
+        if (!confirm('현재 작성 중인 내용이 있습니다. 템플릿으로 대체하시겠습니까?')) {
+          return;
+        }
+      }
+      
+      showLoading(true);
+      google.script.run
+        .withSuccessHandler(function(template) {
+          showLoading(false);
+          if (template) {
+            $('#summernoteEditor').summernote('code', template);
+            showToast('템플릿이 불러와졌습니다.', 'success');
+            
+            // 제목 자동 설정
+            const titleInput = document.querySelector('input[name="title"]');
+            if (titleInput && !titleInput.value) {
+              const templateNames = {
+                'contract': '실습계약서',
+                'profile': '실습생 Profile',
+                'daily_log': '실습일지',
+                'org_analysis': '기관분석보고서',
+                'community_analysis': '지역사회분석보고서',
+                'other_report': '기타과제보고서',
+                'book_review': '필독서 서평보고서',
+                'mid_evaluation': '실습중간평가서',
+                'final_evaluation': '실습종결평가서',
+                'case_counseling': '사례관리 상담기록지',
+                'program_plan': '프로그램 실행계획서',
+                'program_result': '프로그램 실행결과보고서'
+              };
+              titleInput.value = templateNames[templateType] || '';
+            }
+          } else {
+            showToast('템플릿을 불러올 수 없습니다.', 'error');
+          }
+        })
+        .withFailureHandler(handleError)
+        .getFormTemplate(templateType);
+    }
+    
+    // 에디터 초기화
+    function clearEditor() {
+      if (confirm('작성 중인 내용을 모두 지우시겠습니까?')) {
+        $('#summernoteEditor').summernote('code', '');
+        document.getElementById('templateSelect').value = '';
+        showToast('에디터가 초기화되었습니다.', 'info');
+      }
+    }
+    
+    // 임시저장
+    function saveDraft() {
+      try {
+        var formSelect = document.getElementById('formSelect');
+        var customTypeInput = document.querySelector('input[name="customType"]');
+        var titleInput = document.querySelector('input[name="title"]');
+        var submitTypeRadio = document.querySelector('input[name="submitType"]:checked');
+        var templateSelect = document.getElementById('templateSelect');
+        var editorContent = '';
+        
+        // Summernote 에디터가 초기화되어 있는지 확인
+        if ($('#summernoteEditor').summernote) {
+          try {
+            editorContent = $('#summernoteEditor').summernote('code');
+          } catch (e) {
+            editorContent = '';
+          }
+        }
+        
+        var draft = {
+          formSelect: formSelect ? formSelect.value : '',
+          customType: customTypeInput ? customTypeInput.value : '',
+          title: titleInput ? titleInput.value : '',
+          submitType: submitTypeRadio ? submitTypeRadio.value : 'file',
+          templateSelect: templateSelect ? templateSelect.value : '',
+          editorContent: editorContent,
+          savedAt: new Date().toISOString()
+        };
+        
+        localStorage.setItem('internship_submission_draft', JSON.stringify(draft));
+        
+        var savedTime = new Date().toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' });
+        showToast('임시저장 완료 (' + savedTime + ')', 'success');
+      } catch (error) {
+        console.error('임시저장 오류:', error);
+        showToast('임시저장에 실패했습니다.', 'error');
+      }
+    }
+    
+    // 임시저장 불러오기
+    function loadDraft() {
+      try {
+        var draftJson = localStorage.getItem('internship_submission_draft');
+        
+        if (!draftJson) {
+          showToast('저장된 임시저장 내용이 없습니다.', 'warning');
+          return;
+        }
+        
+        var draft = JSON.parse(draftJson);
+        var savedDate = new Date(draft.savedAt);
+        var timeAgo = getTimeAgo(savedDate);
+        
+        if (!confirm('임시저장된 내용을 불러오시겠습니까?\n\n저장 시간: ' + savedDate.toLocaleString('ko-KR') + ' (' + timeAgo + ')')) {
+          return;
+        }
+        
+        // 서식 선택 복원
+        var formSelect = document.getElementById('formSelect');
+        if (formSelect && draft.formSelect) {
+          formSelect.value = draft.formSelect;
+          onFormSelect(); // 서식 선택 이벤트 트리거
+        }
+        
+        // 사용자 정의 유형 복원
+        var customTypeInput = document.querySelector('input[name="customType"]');
+        if (customTypeInput && draft.customType) {
+          customTypeInput.value = draft.customType;
+        }
+        
+        // 제목 복원
+        var titleInput = document.querySelector('input[name="title"]');
+        if (titleInput && draft.title) {
+          titleInput.value = draft.title;
+        }
+        
+        // 제출 방식 복원
+        if (draft.submitType) {
+          var submitTypeRadio = document.querySelector('input[name="submitType"][value="' + draft.submitType + '"]');
+          if (submitTypeRadio) {
+            submitTypeRadio.checked = true;
+            toggleSubmitType();
+          }
+        }
+        
+        // 템플릿 선택 복원
+        var templateSelect = document.getElementById('templateSelect');
+        if (templateSelect && draft.templateSelect) {
+          templateSelect.value = draft.templateSelect;
+        }
+        
+        // 에디터 내용 복원
+        if (draft.editorContent && $('#summernoteEditor').summernote) {
+          try {
+            $('#summernoteEditor').summernote('code', draft.editorContent);
+          } catch (e) {
+            console.error('에디터 내용 복원 오류:', e);
+          }
+        }
+        
+        showToast('임시저장 내용을 불러왔습니다.', 'success');
+      } catch (error) {
+        console.error('불러오기 오류:', error);
+        showToast('불러오기에 실패했습니다.', 'error');
+      }
+    }
+    
+    // 시간 경과 계산
+    function getTimeAgo(date) {
+      var now = new Date();
+      var diff = now - date;
+      var minutes = Math.floor(diff / 60000);
+      var hours = Math.floor(diff / 3600000);
+      var days = Math.floor(diff / 86400000);
+      
+      if (minutes < 1) return '방금 전';
+      if (minutes < 60) return minutes + '분 전';
+      if (hours < 24) return hours + '시간 전';
+      return days + '일 전';
+    }
+    
+    // 임시저장 삭제 (제출 완료 후 호출)
+    function clearDraft() {
+      try {
+        localStorage.removeItem('internship_submission_draft');
+      } catch (e) {
+        console.error('임시저장 삭제 오류:', e);
+      }
+    }
+    
+    // 자동 임시저장 (5분마다)
+    var autoSaveInterval = null;
+    function startAutoSave() {
+      if (autoSaveInterval) clearInterval(autoSaveInterval);
+      autoSaveInterval = setInterval(function() {
+        var editorContent = '';
+        try {
+          editorContent = $('#summernoteEditor').summernote('code');
+        } catch (e) {}
+        
+        // 내용이 있을 때만 자동저장
+        var textContent = editorContent.replace(/<[^>]*>/g, '').trim();
+        if (textContent.length > 10) {
+          saveDraftSilent();
+        }
+      }, 300000); // 5분 = 300000ms
+    }
+    
+    // 무음 임시저장 (자동저장용)
+    function saveDraftSilent() {
+      try {
+        var formSelect = document.getElementById('formSelect');
+        var customTypeInput = document.querySelector('input[name="customType"]');
+        var titleInput = document.querySelector('input[name="title"]');
+        var submitTypeRadio = document.querySelector('input[name="submitType"]:checked');
+        var templateSelect = document.getElementById('templateSelect');
+        var editorContent = '';
+        
+        if ($('#summernoteEditor').summernote) {
+          try {
+            editorContent = $('#summernoteEditor').summernote('code');
+          } catch (e) {}
+        }
+        
+        var draft = {
+          formSelect: formSelect ? formSelect.value : '',
+          customType: customTypeInput ? customTypeInput.value : '',
+          title: titleInput ? titleInput.value : '',
+          submitType: submitTypeRadio ? submitTypeRadio.value : 'file',
+          templateSelect: templateSelect ? templateSelect.value : '',
+          editorContent: editorContent,
+          savedAt: new Date().toISOString()
+        };
+        
+        localStorage.setItem('internship_submission_draft', JSON.stringify(draft));
+        console.log('자동 임시저장 완료:', new Date().toLocaleTimeString());
+      } catch (error) {
+        console.error('자동 임시저장 오류:', error);
+      }
+    }
+    
+    function clearFile(inputId, displayId) {
+      document.getElementById(inputId).value = '';
+      document.getElementById(displayId).innerHTML = '';
+    }
+    
+    function submitAssignment(e) {
+      e.preventDefault();
+      
+      const form = document.getElementById('submitForm');
+      const submitType = document.querySelector('input[name="submitType"]:checked').value;
+      const formSelect = document.getElementById('formSelect');
+      const selectedOption = formSelect.options[formSelect.selectedIndex];
+      
+      // 서식 정보 추출
+      let formId = '', formName = '', formType = '';
+      if (formSelect.value === 'custom') {
+        formName = (form.customType && form.customType.value) ? form.customType.value : '기타';
+        formType = '기타';
+      } else if (formSelect.value) {
+        formId = formSelect.value;
+        formName = selectedOption.dataset.name;
+        formType = selectedOption.dataset.type;
+      } else {
+        showToast('서식을 선택해주세요.', 'warning');
+        return;
+      }
+      
+      const title = form.title.value;
+      if (!title) {
+        showToast('제목을 입력해주세요.', 'warning');
+        return;
+      }
+      
+      // 제출 방식에 따른 내용 및 파일 처리
+      let content = '';
+      let fileInput, file;
+      
+      if (submitType === 'file') {
+        fileInput = document.getElementById('submissionFile');
+        file = fileInput.files[0];
+        content = (form.content && form.content.value) ? form.content.value : '';
+        
+        if (!file) {
+          showToast('파일을 선택해주세요.', 'warning');
+          return;
+        }
+      } else {
+        // 직접 입력 - Summernote 에디터에서 내용 가져오기
+        content = $('#summernoteEditor').summernote('code') || '';
+        fileInput = document.getElementById('directFile');
+        file = fileInput ? fileInput.files[0] : null;
+        
+        // 빈 내용 체크 (HTML 태그만 있는 경우도 빈 것으로 처리)
+        const textContent = $('<div>').html(content).text().trim();
+        if (!textContent) {
+          showToast('내용을 입력해주세요.', 'warning');
+          return;
+        }
+      }
+      
+      const processSubmission = function(fileId, fileName) {
+        google.script.run
+          .withSuccessHandler(function(result) {
+            showLoading(false);
+            if (result.success) {
+              showToast('과제가 제출되었습니다.', 'success');
+              form.reset();
+              clearFile('submissionFile', 'selectedFile');
+              clearFile('directFile', 'selectedDirectFile');
+              document.getElementById('formDownloadArea').style.display = 'none';
+              document.getElementById('customTypeGroup').style.display = 'none';
+              // Summernote 에디터 초기화
+              $('#summernoteEditor').summernote('code', '');
+              toggleSubmitType();
+              loadMySubmissions();
+              // 임시저장 삭제
+              clearDraft();
+              closeDraftAlert();
+            } else {
+              showToast(result.message, 'error');
+            }
+          })
+          .withFailureHandler(handleError)
+          .submitAssignment(formId, formName, formType, title, content, fileId || '', fileName || '', loggedInEmail);
+      };
+      
+      showLoading(true);
+      
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          const base64 = e.target.result.split(',')[1];
+          const mimeType = file.type || 'application/octet-stream';
+          
+          google.script.run
+            .withSuccessHandler(function(result) {
+              if (result.success) {
+                processSubmission(result.fileId, file.name);
+              } else {
+                showLoading(false);
+                showToast(result.message, 'error');
+              }
+            })
+            .withFailureHandler(handleError)
+            .uploadFile(file.name, base64, mimeType, '과제제출');
+        };
+        reader.readAsDataURL(file);
+      } else {
+        processSubmission(null, null);
+      }
+    }
+    
+    function viewFeedback(id) {
+      var data = window.mySubmissionsData || [];
+      var submission = null;
+      for (var i = 0; i < data.length; i++) {
+        if (data[i].id === id) {
+          submission = data[i];
+          break;
+        }
+      }
+      if (!submission) {
+        showToast('피드백 정보를 찾을 수 없습니다.', 'error');
+        return;
+      }
+      
+      var safeTitle = (submission.title || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+      var safeFeedback = (submission.feedback || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+      var safeWriter = (submission.feedbackWriter || '슈퍼바이저').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+      var feedbackDate = submission.feedbackAt ? ' · <i class="fas fa-clock"></i> ' + submission.feedbackAt.substring(0, 10) : '';
+      
+      document.getElementById('feedbackContent').innerHTML = '<div style="margin-bottom: 1rem;"><strong>과제 제목:</strong> ' + safeTitle + '</div><div style="background: var(--bg); border-radius: 8px; padding: 1rem; margin-bottom: 1rem;"><strong>피드백 내용:</strong><div style="margin-top: 0.5rem; white-space: pre-wrap;">' + safeFeedback + '</div></div><div style="color: var(--secondary); font-size: 0.875rem;"><i class="fas fa-user"></i> ' + safeWriter + feedbackDate + '</div>';
+      
+      openModal('feedbackModal');
+    }
+    
+    function loadMySubmissions() {
+      google.script.run
+        .withSuccessHandler(function(submissions) {
+          submissions = submissions || [];
+          window.mySubmissionsData = submissions; // 데이터 저장
+          const container = document.getElementById('submissionList');
+          
+          if (submissions.length === 0) {
+            container.innerHTML = '<div class="empty-state"><i class="fas fa-inbox"></i><p>제출한 과제가 없습니다.</p></div>';
+            return;
+          }
+          
+          var rows = '';
+          for (var i = 0; i < submissions.length; i++) {
+            var s = submissions[i];
+            var safeTitle = (s.title || '-').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+            var safeFormName = (s.formName || s.type || '-').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+            var statusBadge = s.confirmed ? '<span class="badge badge-success">확인됨</span>' : '<span class="badge badge-warning">대기중</span>';
+            var feedbackBtn = s.feedback ? '<button class="btn btn-outline btn-sm" onclick="viewFeedback(\'' + s.id + '\')"><i class="fas fa-comment"></i> 피드백 보기</button>' : '<span style="color: var(--secondary);">-</span>';
+            var fileIcon = s.fileId ? '<i class="fas fa-paperclip" style="color: var(--secondary); margin-left: 0.25rem;"></i>' : '';
+            
+            rows += '<tr>';
+            rows += '<td><span class="badge badge-info">' + safeFormName + '</span></td>';
+            rows += '<td>' + safeTitle + fileIcon + '</td>';
+            rows += '<td>' + (s.submittedAt || '').substring(0, 10) + '</td>';
+            rows += '<td>' + statusBadge + '</td>';
+            rows += '<td>' + feedbackBtn + '</td>';
+            rows += '</tr>';
+          }
+          
+          container.innerHTML = '<div class="table-container"><table class="table"><thead><tr><th>서식</th><th>제목</th><th>제출일</th><th>상태</th><th>피드백</th></tr></thead><tbody>' + rows + '</tbody></table></div>';
+        })
+        .withFailureHandler(handleError)
+        .getMySubmissions();
+    }
+    
+    // ==================== 만족도조사 탭 ====================
+    function loadSatisfactionTab() {
+      const container = document.getElementById('satisfactionForm');
+      
+      var html = '<form id="satisfactionSurvey" onsubmit="submitSatisfaction(event)">';
+      html += '<h3 style="margin-bottom: 1.5rem;">I. 실습환경</h3>';
+      html += renderLikertQuestion('q1', '실습기관의 시설 및 환경은 적절했습니까?');
+      html += renderLikertQuestion('q2', '실습에 필요한 자료나 정보가 충분히 제공되었습니까?');
+      html += renderLikertQuestion('q3', '실습 시간 및 일정은 적절했습니까?');
+      html += '<h3 style="margin: 2rem 0 1.5rem;">II. 슈퍼비전</h3>';
+      html += renderLikertQuestion('q4', '슈퍼바이저의 지도는 체계적이었습니까?');
+      html += renderLikertQuestion('q5', '슈퍼바이저와의 의사소통이 원활했습니까?');
+      html += renderLikertQuestion('q6', '슈퍼바이저의 피드백이 도움이 되었습니까?');
+      html += '<h3 style="margin: 2rem 0 1.5rem;">III. 실습내용</h3>';
+      html += renderLikertQuestion('q7', '실습 내용이 학교에서 배운 이론과 연계되었습니까?');
+      html += renderLikertQuestion('q8', '다양한 프로그램에 참여할 기회가 있었습니까?');
+      html += renderLikertQuestion('q9', '실습을 통해 전문성이 향상되었습니까?');
+      html += renderLikertQuestion('q10', '전반적으로 실습에 만족합니까?');
+      html += '<h3 style="margin: 2rem 0 1.5rem;">IV. 자유의견</h3>';
+      html += '<div class="form-group"><label class="form-label">좋았던 점</label><textarea class="form-textarea" name="positive" placeholder="실습 중 좋았던 점을 자유롭게 작성해 주세요."></textarea></div>';
+      html += '<div class="form-group"><label class="form-label">개선이 필요한 점</label><textarea class="form-textarea" name="improvement" placeholder="개선이 필요한 점을 자유롭게 작성해 주세요."></textarea></div>';
+      html += '<div class="form-group"><label class="form-label">기타 의견</label><textarea class="form-textarea" name="other" placeholder="기타 의견이 있다면 작성해 주세요."></textarea></div>';
+      html += '<button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 1.5rem;"><i class="fas fa-paper-plane"></i> 제출</button></form>';
+      
+      container.innerHTML = html;
+    }
+    
+    function renderLikertQuestion(name, question) {
+      var options = [
+        {v: 5, l: '매우 그렇다'},
+        {v: 4, l: '그렇다'},
+        {v: 3, l: '보통'},
+        {v: 2, l: '그렇지 않다'},
+        {v: 1, l: '매우 그렇지 않다'}
+      ];
+      var optHtml = '';
+      for (var i = 0; i < options.length; i++) {
+        var opt = options[i];
+        optHtml += '<label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer;"><input type="radio" name="' + name + '" value="' + opt.v + '" required> ' + opt.l + '</label>';
+      }
+      return '<div class="form-group"><label class="form-label">' + question + '</label><div style="display: flex; gap: 1rem; flex-wrap: wrap;">' + optHtml + '</div></div>';
+    }
+    
+    function submitSatisfaction(e) {
+      e.preventDefault();
+      
+      const form = document.getElementById('satisfactionSurvey');
+      const formData = new FormData(form);
+      const responses = {};
+      
+      for (let [key, value] of formData.entries()) {
+        responses[key] = value;
+      }
+      
+      showLoading(true);
+      google.script.run
+        .withSuccessHandler(function(result) {
+          showLoading(false);
+          if (result.success) {
+            showToast('만족도 조사가 제출되었습니다. 감사합니다.', 'success');
+            document.getElementById('satisfactionForm').innerHTML = '<div class="alert alert-success"><i class="fas fa-check-circle"></i><div><strong>제출이 완료되었습니다.</strong><br>만족도 조사에 참여해 주셔서 감사합니다.</div></div>';
+          } else {
+            showToast(result.message, 'error');
+          }
+        })
+        .withFailureHandler(handleError)
+        .submitSatisfaction(responses);
+    }
+    
+    // ==================== 유틸리티 함수 ====================
+    function openModal(id) {
+      document.getElementById(id).classList.add('active');
+    }
+    
+    function closeModal(id) {
+      document.getElementById(id).classList.remove('active');
+    }
+    
+    function showLoading(show) {
+      document.getElementById('loading').classList.toggle('active', show);
+    }
+    
+    // HTML 이스케이프 헬퍼 함수
+    function escapeHtml(str) {
+      if (!str) return '';
+      return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+    }
+    
+    function showToast(message, type) {
+      const container = document.getElementById('toastContainer');
+      const toast = document.createElement('div');
+      toast.className = 'toast';
+      
+      var icon = 'info-circle';
+      if (type === 'success') icon = 'check-circle';
+      if (type === 'error') icon = 'exclamation-circle';
+      if (type === 'warning') icon = 'exclamation-triangle';
+      
+      toast.innerHTML = '<i class="fas fa-' + icon + '"></i> ' + message;
+      container.appendChild(toast);
+      
+      setTimeout(function() { toast.remove(); }, 4000);
+    }
+    
+    function handleError(error) {
+      showLoading(false);
+      showToast('오류가 발생했습니다: ' + error.message, 'error');
+      console.error(error);
+    }
+    
+    function getStatusBadge(status) {
+      switch(status) {
+        case '접수완료': return 'badge-info';
+        case '1차합격': return 'badge-success';
+        case '최종합격': return 'badge-success';
+        case '불합격': return 'badge-danger';
+        default: return 'badge-info';
+      }
+    }
+    
+    function downloadFile(fileId) {
+      if (!fileId || fileId === 'undefined' || fileId === 'null') {
+        showToast('파일 정보가 없습니다.', 'warning');
+        return;
+      }
+      showLoading(true);
+      google.script.run
+        .withSuccessHandler(function(result) {
+          showLoading(false);
+          if (result.success) {
+            window.open(result.url, '_blank');
+          } else {
+            showToast(result.message || '파일을 찾을 수 없습니다.', 'error');
+          }
+        })
+        .withFailureHandler(handleError)
+        .getFileDownloadUrl(fileId);
+    }
+    
+    // ==================== 테이블 조작 함수 ====================
+    
+    // 테이블 크기 선택 모달 표시
+    function showTableSizeModal() {
+      document.getElementById('tableRows').value = 3;
+      document.getElementById('tableCols').value = 3;
+      openModal('tableSizeModal');
+    }
+    
+    // 커스텀 크기 테이블 삽입
+    function insertCustomTable() {
+      var rows = parseInt(document.getElementById('tableRows').value) || 3;
+      var cols = parseInt(document.getElementById('tableCols').value) || 3;
+      if (rows < 1) rows = 1;
+      if (cols < 1) cols = 1;
+      if (rows > 20) rows = 20;
+      if (cols > 10) cols = 10;
+      insertTableAtCursor(rows, cols);
+      closeModal('tableSizeModal');
+    }
+    
+    // 커서 위치에 테이블 삽입
+    function insertTableAtCursor(rows, cols) {
+      var $editable = $('.note-editable');
+      
+      // 테이블 HTML 생성
+      var tableHtml = '<table border="1" style="width: 100%; border-collapse: collapse; margin: 10px 0;">';
+      for (var r = 0; r < rows; r++) {
+        tableHtml += '<tr>';
+        for (var c = 0; c < cols; c++) {
+          tableHtml += '<td style="padding: 10px; border: 1px solid #ccc; min-width: 50px;">&nbsp;</td>';
+        }
+        tableHtml += '</tr>';
+      }
+      tableHtml += '</table>';
+      
+      // 현재 선택 영역 가져오기
+      var selection = window.getSelection();
+      
+      // 선택 영역이 에디터 내에 있는지 확인
+      if (selection.rangeCount > 0) {
+        var range = selection.getRangeAt(0);
+        var container = range.commonAncestorContainer;
+        
+        // 에디터 내부인지 확인
+        var isInEditor = $editable[0].contains(container) || $editable[0] === container;
+        
+        if (isInEditor) {
+          // 커서 위치에 삽입
+          var tempDiv = document.createElement('div');
+          tempDiv.innerHTML = tableHtml;
+          var table = tempDiv.firstChild;
+          
+          // 현재 선택 내용 삭제 후 테이블 삽입
+          range.deleteContents();
+          range.insertNode(table);
+          
+          // 커서를 테이블 뒤로 이동
+          range.setStartAfter(table);
+          range.collapse(true);
+          selection.removeAllRanges();
+          selection.addRange(range);
+          
+          showToast(rows + ' x ' + cols + ' 표가 커서 위치에 삽입되었습니다.', 'success');
+          return;
+        }
+      }
+      
+      // 에디터 내에 커서가 없으면 알림 후 끝에 추가
+      showToast('먼저 표를 삽입할 위치를 클릭하세요. (끝에 추가됨)', 'warning');
+      $editable.append(tableHtml);
+    }
+    var selectedCells = [];
+    
+    // 셀 클릭 이벤트 처리 (Ctrl 키와 함께)
+    $(document).on('click', '.note-editable td, .note-editable th', function(e) {
+      if (e.ctrlKey || e.metaKey) {
+        e.preventDefault();
+        $(this).toggleClass('selected-cell');
+        if ($(this).hasClass('selected-cell')) {
+          $(this).css('background-color', '#b3d9ff');
+          selectedCells.push(this);
+        } else {
+          $(this).css('background-color', '');
+          selectedCells = selectedCells.filter(cell => cell !== this);
+        }
+      }
+    });
+    
+    // 셀 합치기 함수
+    function mergeCells() {
+      if (selectedCells.length < 2) {
+        showToast('합칠 셀을 Ctrl+클릭으로 2개 이상 선택하세요.', 'warning');
+        return;
+      }
+      
+      // 같은 테이블인지 확인
+      var firstTable = $(selectedCells[0]).closest('table')[0];
+      var sameTable = selectedCells.every(cell => $(cell).closest('table')[0] === firstTable);
+      if (!sameTable) {
+        showToast('같은 테이블의 셀만 합칠 수 있습니다.', 'warning');
+        clearCellSelection();
+        return;
+      }
+      
+      // 행과 열 범위 계산
+      var rows = [];
+      var cols = [];
+      selectedCells.forEach(function(cell) {
+        var $cell = $(cell);
+        var rowIndex = $cell.parent('tr').index();
+        var colIndex = $cell.index();
+        rows.push(rowIndex);
+        cols.push(colIndex);
+      });
+      
+      var minRow = Math.min(...rows);
+      var maxRow = Math.max(...rows);
+      var minCol = Math.min(...cols);
+      var maxCol = Math.max(...cols);
+      
+      // 병합 범위 확인
+      var rowspan = maxRow - minRow + 1;
+      var colspan = maxCol - minCol + 1;
+      
+      // 첫 번째 셀에 병합 적용
+      var $table = $(firstTable);
+      var $firstCell = $table.find('tr').eq(minRow).find('td, th').eq(minCol);
+      
+      // 모든 셀의 내용 수집
+      var contents = [];
+      selectedCells.forEach(function(cell) {
+        var text = $(cell).text().trim();
+        if (text) contents.push(text);
+      });
+      
+      // 첫 번째 셀 설정
+      $firstCell.attr('rowspan', rowspan).attr('colspan', colspan);
+      $firstCell.html(contents.join('<br>') || '&nbsp;');
+      
+      // 나머지 셀 제거
+      for (var r = minRow; r <= maxRow; r++) {
+        for (var c = minCol; c <= maxCol; c++) {
+          if (r === minRow && c === minCol) continue;
+          var $row = $table.find('tr').eq(r);
+          var $cell = $row.find('td, th').eq(c);
+          if ($cell.length) $cell.remove();
+        }
+      }
+      
+      clearCellSelection();
+      showToast('셀이 합쳐졌습니다.', 'success');
+    }
+    
+    // 셀 선택 해제
+    function clearCellSelection() {
+      selectedCells.forEach(function(cell) {
+        $(cell).removeClass('selected-cell').css('background-color', '');
+      });
+      selectedCells = [];
+    }
+    
+    // 현재 커서 위치의 테이블 셀 찾기
+    function getCurrentCell() {
+      var selection = window.getSelection();
+      if (!selection.rangeCount) return null;
+      var node = selection.anchorNode;
+      while (node && node.nodeType !== 1) node = node.parentNode;
+      var $cell = $(node).closest('td, th');
+      return $cell.length ? $cell : null;
+    }
+    
+    // 행 추가
+    function addTableRow() {
+      var $cell = getCurrentCell();
+      if (!$cell) {
+        showToast('테이블 셀을 클릭한 후 사용하세요.', 'warning');
+        return;
+      }
+      var $row = $cell.closest('tr');
+      var cellCount = $row.find('td, th').length;
+      var newRow = '<tr>' + '<td style="padding: 10px; border: 1px solid #ccc;">&nbsp;</td>'.repeat(cellCount) + '</tr>';
+      $row.after(newRow);
+      showToast('행이 추가되었습니다.', 'success');
+    }
+    
+    // 열 추가
+    function addTableColumn() {
+      var $cell = getCurrentCell();
+      if (!$cell) {
+        showToast('테이블 셀을 클릭한 후 사용하세요.', 'warning');
+        return;
+      }
+      var colIndex = $cell.index();
+      var $table = $cell.closest('table');
+      $table.find('tr').each(function() {
+        var $cells = $(this).find('td, th');
+        if ($cells.length > colIndex) {
+          var tagName = $cells.eq(colIndex).is('th') ? 'th' : 'td';
+          $cells.eq(colIndex).after('<' + tagName + ' style="padding: 10px; border: 1px solid #ccc;">&nbsp;</' + tagName + '>');
+        }
+      });
+      showToast('열이 추가되었습니다.', 'success');
+    }
+    
+    // 행 삭제
+    function deleteTableRow() {
+      var $cell = getCurrentCell();
+      if (!$cell) {
+        showToast('테이블 셀을 클릭한 후 사용하세요.', 'warning');
+        return;
+      }
+      var $row = $cell.closest('tr');
+      var $table = $cell.closest('table');
+      if ($table.find('tr').length <= 1) {
+        showToast('마지막 행은 삭제할 수 없습니다.', 'warning');
+        return;
+      }
+      $row.remove();
+      showToast('행이 삭제되었습니다.', 'success');
+    }
+    
+    // 열 삭제
+    function deleteTableColumn() {
+      var $cell = getCurrentCell();
+      if (!$cell) {
+        showToast('테이블 셀을 클릭한 후 사용하세요.', 'warning');
+        return;
+      }
+      var colIndex = $cell.index();
+      var $table = $cell.closest('table');
+      var maxCols = 0;
+      $table.find('tr').each(function() {
+        maxCols = Math.max(maxCols, $(this).find('td, th').length);
+      });
+      if (maxCols <= 1) {
+        showToast('마지막 열은 삭제할 수 없습니다.', 'warning');
+        return;
+      }
+      $table.find('tr').each(function() {
+        $(this).find('td, th').eq(colIndex).remove();
+      });
+      showToast('열이 삭제되었습니다.', 'success');
+    }
+    
+    function submitPrivacyConsent() {
+      if (!document.getElementById('privacyAgree').checked) {
+        showToast('동의에 체크해 주세요.', 'warning');
+        return;
+      }
+      
+      google.script.run
+        .withSuccessHandler(function(result) {
+          if (result.success) {
+            closeModal('privacyModal');
+            showToast('개인정보 동의가 완료되었습니다.', 'success');
+          }
+        })
+        .withFailureHandler(handleError)
+        .savePrivacyConsent('', '실습신청');
+    }
+  </script>
+</body>
+</html>
