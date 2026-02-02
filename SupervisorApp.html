@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html>
 <head>
@@ -117,14 +118,67 @@
   <div class="loading" id="loading"><div class="spinner"></div></div>
   <div class="toast-container" id="toastContainer"></div>
   
-  <header class="header">
-    <div class="header-content">
-      <div class="logo"><i class="fas fa-user-tie"></i><span>사회복지현장실습 관리</span></div>
-      <div class="user-info"><span class="badge">슈퍼바이저</span><span id="userEmail"></span></div>
+  <!-- 로그인 화면 -->
+  <div id="loginScreen">
+    <div style="min-height: 100vh; display: flex; align-items: center; justify-content: center; background: linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%); padding: 20px;">
+      <div style="background: white; border-radius: 16px; padding: 40px; width: 100%; max-width: 400px; box-shadow: 0 20px 60px rgba(0,0,0,0.3);">
+        <div style="text-align: center; margin-bottom: 30px;">
+          <i class="fas fa-user-tie" style="font-size: 48px; color: #7c3aed; margin-bottom: 15px;"></i>
+          <h1 style="font-size: 1.5rem; color: #1e293b; margin-bottom: 5px;">슈퍼바이저 로그인</h1>
+          <p style="color: #64748b; font-size: 0.9rem;">사회복지현장실습 관리시스템</p>
+        </div>
+        
+        <div id="loginForm">
+          <div style="margin-bottom: 20px;">
+            <label style="display: block; font-weight: 600; margin-bottom: 8px; color: #374151;">이메일</label>
+            <input type="email" id="loginEmail" placeholder="등록된 이메일" 
+              style="width: 100%; padding: 12px 16px; border: 2px solid #e2e8f0; border-radius: 8px; font-size: 1rem; transition: border-color 0.2s;"
+              onfocus="this.style.borderColor='#7c3aed'" onblur="this.style.borderColor='#e2e8f0'">
+          </div>
+          
+          <div style="margin-bottom: 20px;">
+            <label style="display: block; font-weight: 600; margin-bottom: 8px; color: #374151;">비밀번호</label>
+            <input type="password" id="loginPassword" placeholder="비밀번호"
+              style="width: 100%; padding: 12px 16px; border: 2px solid #e2e8f0; border-radius: 8px; font-size: 1rem; transition: border-color 0.2s;"
+              onfocus="this.style.borderColor='#7c3aed'" onblur="this.style.borderColor='#e2e8f0'"
+              onkeypress="if(event.key==='Enter') doLogin();">
+          </div>
+          
+          <button onclick="doLogin()" style="width: 100%; padding: 14px; background: linear-gradient(135deg, #7c3aed, #6d28d9); color: white; border: none; border-radius: 8px; font-size: 1rem; font-weight: 600; cursor: pointer; transition: transform 0.2s, box-shadow 0.2s;"
+            onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 4px 12px rgba(124,58,237,0.4)';"
+            onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='none';">
+            <i class="fas fa-sign-in-alt"></i> 로그인
+          </button>
+          
+          <div id="loginError" style="margin-top: 15px; padding: 12px; background: #fef2f2; border: 1px solid #fecaca; border-radius: 8px; color: #dc2626; font-size: 0.9rem; display: none;">
+          </div>
+        </div>
+        
+        <div style="margin-top: 25px; padding-top: 20px; border-top: 1px solid #e2e8f0;">
+          <p style="color: #64748b; font-size: 0.85rem; text-align: center;">
+            <i class="fas fa-info-circle"></i> 슈퍼바이저 시트에 등록된 계정만 로그인할 수 있습니다.
+          </p>
+        </div>
+      </div>
     </div>
-  </header>
+  </div>
   
-  <div class="mobile-nav" id="mobileNav"></div>
+  <!-- 메인 앱 -->
+  <div id="mainApp" style="display: none;">
+    <header class="header">
+      <div class="header-content">
+        <div class="logo"><i class="fas fa-user-tie"></i><span>사회복지현장실습 관리</span></div>
+        <div class="user-info">
+          <span class="badge">슈퍼바이저</span>
+          <span id="userEmail"></span>
+          <button onclick="doLogout()" style="margin-left: 10px; background: rgba(255,255,255,0.2); border: none; color: white; padding: 5px 10px; border-radius: 5px; cursor: pointer; font-size: 0.8rem;">
+            <i class="fas fa-sign-out-alt"></i> 로그아웃
+          </button>
+        </div>
+      </div>
+    </header>
+    
+    <div class="mobile-nav" id="mobileNav"></div>
   
   <div class="app-container">
     <nav class="sidebar" id="sidebar">
@@ -265,6 +319,7 @@
       </div>
     </main>
   </div>
+  </div> <!-- mainApp 종료 -->
   
   <!-- 출석부 출력 모달 -->
   <div class="modal-overlay" id="attendancePrintModal">
@@ -316,7 +371,8 @@
             </select>
           </div>
           <div class="form-group"><label class="form-label">직위</label><input type="text" class="form-input" id="supervisorPosition" placeholder="예: 사회복지사, 팀장"></div>
-          <div class="form-group"><label class="form-label">이메일 <span style="color:red;">*</span></label><input type="email" class="form-input" id="supervisorEmail" placeholder="example@sillym.or.kr" required></div>
+          <div class="form-group"><label class="form-label">이메일 <span style="color:red;">*</span></label><input type="email" class="form-input" id="supervisorEmailInput" placeholder="example@sillym.or.kr" required></div>
+          <div class="form-group"><label class="form-label">비밀번호 <span style="color:red;">*</span></label><input type="text" class="form-input" id="supervisorPassword" placeholder="로그인에 사용할 비밀번호" required></div>
           <div class="form-group" style="display:flex; align-items:center; gap:0.5rem;">
             <input type="checkbox" id="supervisorActive" checked style="width:18px; height:18px;">
             <label for="supervisorActive">활성화 (슈퍼바이저 앱 접근 허용)</label>
@@ -495,13 +551,96 @@
     let noticePage = 1;
     let formsData = []; // 서식 데이터 저장용
     
+    // 로그인 관련 변수
+    let loggedInEmail = null;
+    let loggedInName = null;
+    let loggedInDepartment = null;
+    
     document.addEventListener('DOMContentLoaded', function() {
-      initApp();
+      checkLoginStatus();
+    });
+    
+    // ==================== 로그인 관련 ====================
+    function checkLoginStatus() {
+      loggedInEmail = sessionStorage.getItem('supervisorEmail');
+      loggedInName = sessionStorage.getItem('supervisorName');
+      loggedInDepartment = sessionStorage.getItem('supervisorDepartment');
+      
+      if (loggedInEmail) {
+        showMainApp();
+      } else {
+        showLoginScreen();
+      }
+    }
+    
+    function showLoginScreen() {
+      document.getElementById('loginScreen').style.display = 'block';
+      document.getElementById('mainApp').style.display = 'none';
+      showLoading(false);
+    }
+    
+    function showMainApp() {
+      document.getElementById('loginScreen').style.display = 'none';
+      document.getElementById('mainApp').style.display = 'block';
+      document.getElementById('userEmail').textContent = loggedInName + ' (' + loggedInEmail + ')';
+      
+      // 앱 초기화
       setupNavigation();
       setupFileInputs();
       setupScoreInputs();
-    });
+      initApp();
+    }
     
+    function doLogin() {
+      const email = document.getElementById('loginEmail').value.trim();
+      const password = document.getElementById('loginPassword').value.trim();
+      const errorDiv = document.getElementById('loginError');
+      
+      if (!email || !password) {
+        errorDiv.textContent = '이메일과 비밀번호를 입력해주세요.';
+        errorDiv.style.display = 'block';
+        return;
+      }
+      
+      errorDiv.style.display = 'none';
+      showLoading(true);
+      
+      google.script.run
+        .withSuccessHandler(function(result) {
+          showLoading(false);
+          if (result.success) {
+            // 로그인 성공 - 세션 저장
+            sessionStorage.setItem('supervisorEmail', result.email);
+            sessionStorage.setItem('supervisorName', result.name);
+            sessionStorage.setItem('supervisorDepartment', result.department || '');
+            loggedInEmail = result.email;
+            loggedInName = result.name;
+            loggedInDepartment = result.department || '';
+            showMainApp();
+          } else {
+            errorDiv.textContent = result.message;
+            errorDiv.style.display = 'block';
+          }
+        })
+        .withFailureHandler(function(error) {
+          showLoading(false);
+          errorDiv.textContent = '로그인 중 오류가 발생했습니다.';
+          errorDiv.style.display = 'block';
+        })
+        .loginSupervisor(email, password);
+    }
+    
+    function doLogout() {
+      sessionStorage.removeItem('supervisorEmail');
+      sessionStorage.removeItem('supervisorName');
+      sessionStorage.removeItem('supervisorDepartment');
+      loggedInEmail = null;
+      loggedInName = null;
+      loggedInDepartment = null;
+      showLoginScreen();
+    }
+    
+    // ==================== 앱 초기화 ====================
     function initApp() {
       showLoading(true);
       // 설정을 미리 로드
@@ -509,18 +648,11 @@
         window.appSettings = settings || {};
       }).getSettings(currentYear);
       
-      google.script.run.withSuccessHandler(function(status) {
-        // 테스트 모드 표시
-        if (status.isTestMode) {
-          document.getElementById('userEmail').innerHTML = `<span class="badge" style="background: #ef4444; margin-left: 0.5rem;">테스트</span> ${status.user.email}`;
-        } else {
-          document.getElementById('userEmail').textContent = status.user.email;
-        }
-        google.script.run.withSuccessHandler(function(hasConsent) {
-          showLoading(false);
-          if (!hasConsent) { openModal('consentModal'); } else { loadSettingsTab(); }
-        }).withFailureHandler(handleError).checkSupervisorConsent();
-      }).withFailureHandler(handleError).getAppStatus();
+      // 슈퍼바이저 동의 확인
+      google.script.run.withSuccessHandler(function(hasConsent) {
+        showLoading(false);
+        if (!hasConsent) { openModal('consentModal'); } else { loadSettingsTab(); }
+      }).withFailureHandler(handleError).checkSupervisorConsent();
     }
     
     function setupNavigation() {
@@ -1722,7 +1854,7 @@
                     <td>${sv.email}</td>
                     <td>${sv.active ? '<span class="badge badge-success">활성</span>' : '<span class="badge badge-danger">비활성</span>'}</td>
                     <td>
-                      <button class="btn btn-outline btn-sm" onclick="editSupervisor('${sv.id}', '${sv.name}', '${sv.department}', '${sv.position}', '${sv.email}', ${sv.active})"><i class="fas fa-edit"></i></button>
+                      <button class="btn btn-outline btn-sm" onclick="editSupervisor('${sv.id}', '${sv.name}', '${sv.department}', '${sv.position}', '${sv.email}', '${sv.password || ''}', ${sv.active})"><i class="fas fa-edit"></i></button>
                       <button class="btn btn-outline btn-sm" style="color: var(--danger);" onclick="deleteSupervisorConfirm('${sv.id}', '${sv.name}')"><i class="fas fa-trash"></i></button>
                     </td>
                   </tr>
@@ -1740,18 +1872,20 @@
       document.getElementById('supervisorName').value = '';
       document.getElementById('supervisorDept').value = '';
       document.getElementById('supervisorPosition').value = '';
-      document.getElementById('supervisorEmail').value = '';
+      document.getElementById('supervisorEmailInput').value = '';
+      document.getElementById('supervisorPassword').value = '';
       document.getElementById('supervisorActive').checked = true;
       openModal('supervisorModal');
     }
     
-    function editSupervisor(id, name, dept, position, email, active) {
+    function editSupervisor(id, name, dept, position, email, password, active) {
       document.getElementById('supervisorModalTitle').textContent = '슈퍼바이저 수정';
       document.getElementById('supervisorId').value = id;
       document.getElementById('supervisorName').value = name;
       document.getElementById('supervisorDept').value = dept;
       document.getElementById('supervisorPosition').value = position;
-      document.getElementById('supervisorEmail').value = email;
+      document.getElementById('supervisorEmailInput').value = email;
+      document.getElementById('supervisorPassword').value = password || '';
       document.getElementById('supervisorActive').checked = active;
       openModal('supervisorModal');
     }
@@ -1761,10 +1895,11 @@
       const name = document.getElementById('supervisorName').value.trim();
       const dept = document.getElementById('supervisorDept').value;
       const position = document.getElementById('supervisorPosition').value.trim();
-      const email = document.getElementById('supervisorEmail').value.trim();
+      const email = document.getElementById('supervisorEmailInput').value.trim();
+      const password = document.getElementById('supervisorPassword').value.trim();
       const active = document.getElementById('supervisorActive').checked;
       
-      if (!name || !dept || !position || !email) {
+      if (!name || !dept || !email || !password) {
         showToast('모든 필수 항목을 입력해 주세요.', 'warning');
         return;
       }
@@ -1780,7 +1915,7 @@
           } else {
             showToast(result.message || '오류가 발생했습니다.', 'error');
           }
-        }).withFailureHandler(handleError).updateSupervisor(id, name, dept, position, email, active);
+        }).withFailureHandler(handleError).updateSupervisor(id, name, dept, position, email, password, active);
       } else {
         google.script.run.withSuccessHandler(function(result) {
           showLoading(false);
@@ -1791,7 +1926,7 @@
           } else {
             showToast(result.message || '오류가 발생했습니다.', 'error');
           }
-        }).withFailureHandler(handleError).addSupervisor(name, dept, position, email);
+        }).withFailureHandler(handleError).addSupervisor(name, dept, position, email, password);
       }
     }
     
